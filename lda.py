@@ -17,8 +17,6 @@ import re
 import utils
 from gensim import corpora, models
 
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-
 parser = argparse.ArgumentParser(description="""Applique l'algorithme LDA sur un corpus""");
 parser.add_argument('nb_topics', type=int, 
                     help="Le nombre de topics voulus")
@@ -31,7 +29,12 @@ parser.add_argument('corpus_path', type=str,
 parser.add_argument('dictionary_path', type=str,
                     help="""Le fichier wordids.txt indiquant un id pour chaque mot du
                     corpus. Ce fichier est généré par le script corpus_to_matrix.py""")
+parser.add_argument('-v', '--verbose', action='store_true',
+                    help="Afficher les messages d'information")
 args = parser.parse_args()
+
+if args.verbose:
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 corpus_name = re.split(r'_bow', utils.split_path(args.corpus_path)['name'])[0]
 

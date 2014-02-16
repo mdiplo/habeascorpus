@@ -9,6 +9,7 @@ import sqlite3
 import glob
 import os.path
 import sys
+import logging
 
 root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(root_dir) #TODO : faire fonctionner les import relatif (from .. import utils)
@@ -71,7 +72,12 @@ if __name__ == '__main__':
      données calculées sur le corpus. Ce dossier doit contenir :
          - le corpus au format .tsv
          - le fichier topics.txt généré par lda.py""")
+    parser.add_argument('-v', '--verbose', action='store_true',
+                    help="Afficher les messages d'information")
     arg = parser.parse_args()
+    
+    if arg.verbose:
+        logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     
     tsv_corpus = glob.glob(arg.data_path + '/*.tsv')
     topics = glob.glob(arg.data_path + '/*_topics.txt')
@@ -87,5 +93,10 @@ if __name__ == '__main__':
     conn = sqlite3.connect(corpus_name + '.db')  # @UndefinedVariable
     conn.text_factory = str
     
+    logging.info("Création de la table document")
     create_documents_table(tsv_corpus[0], conn)
+    logging.info("Table document créée")
+    
+    logging.info("Création de la table topic")
     create_topics_table(topics[0], conn)
+    logging.info("Table topic créée")

@@ -24,12 +24,15 @@ import utils
 import habeascorpus
 from gensim import corpora
 
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-
 parser = argparse.ArgumentParser(description="""Génère la représentation matricielle 
 associée à un corpus""");
 parser.add_argument('file_path', type=str, help='Le fichier .csv contenant le corpus')
+parser.add_argument('-v', '--verbose', action='store_true',
+                    help="Afficher les messages d'information")
 arg = parser.parse_args()
+
+if arg.verbose:
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 input_file = utils.split_path(arg.file_path)
 
