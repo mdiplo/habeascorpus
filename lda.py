@@ -33,7 +33,7 @@ parser.add_argument('dictionary_path', type=str,
                     corpus. Ce fichier est généré par le script corpus_to_matrix.py""")
 args = parser.parse_args()
 
-corpus_name = re.split(r'_bow', utils.split_path(args.corpus_path)['name'])
+corpus_name = re.split(r'_bow', utils.split_path(args.corpus_path)['name'])[0]
 
 if os.path.isfile(corpus_name + '_lda.mm'):
     raise IOError("Le corpus LDA existe déjà sous forme matricielle")
@@ -53,7 +53,7 @@ except Exception:
 lda = models.ldamodel.LdaModel(corpus=corpus,id2word=id2word,
                                        num_topics=args.nb_topics, passes=args.nb_passes) 
 corpora.mmcorpus.MmCorpus.serialize(corpus_name + '_lda.mm', lda[corpus], progress_cnt=1000)
-topics = lda.show_topic(topics=-1, formatted=False)
-with open(corpus_name + '_topics.txt') as f:
+topics = lda.show_topics(topics=-1, formatted=False)
+with open(corpus_name + '_topics.txt', 'w') as f:
     for topic in topics:
         f.write('\t'.join(str(x) for x in topic) + '\n')

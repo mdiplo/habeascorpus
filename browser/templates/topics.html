@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Topics du corpus {{ corpus.name }} </title>  		
+    </head>
+    <body>
+    	<h1>Topics du corpus {{ corpus.name }}</h1>
+    	<ol>
+    		{% for topic in topics %}
+    		<li>
+    			{% for word in topic  %}
+    			{{ word.1 }} ({{ word.0|floatformat:-3}})
+    			{% endfor %}
+    		</li>
+    		{% endfor %}
+    	</ol>
+    </body>
+</html>  	
