@@ -35,7 +35,7 @@ def create_documents_table(corpus_file, conn):
     
     c = conn.cursor()
     c.execute("""CREATE TABLE document
-    (id_ INTEGER PRIMARY KEY, titre TEXT, chapo TEXT, texte TEXT, langue TEXT, 
+    (id_article INTEGER PRIMARY KEY, titre TEXT, chapo TEXT, texte TEXT, langue TEXT, 
     auteur TEXT, mots TEXT, date NUMERIC)""")
     conn.commit()
     
@@ -44,6 +44,24 @@ def create_documents_table(corpus_file, conn):
         insert_query = """INSERT INTO document VALUES(?, ?, ?, ?, ?, ?, ?, ?)"""
         for raw_line in inp:
                 c.execute(insert_query, raw_line.split('\t'))
+        conn.commit()
+        
+def create_topics_table(topics_file, conn):
+    """
+    Génère la table topics à partir du fichier topics.txt généré par lda.py
+    
+    :Parameters:
+        -`topics_file`: Le fichier topics.txt contenant les topics
+        -`conn`: L'objet Connexion à la base sqlite
+    
+    """
+    c = conn.cursor()
+    c.execute("""CREATE TABLE topic (id INTEGER PRIMARY KEY, description TEXT)""")
+    conn.commit()
+    
+    with open(topics_file, 'r') as inp:
+        c.executemany("""INSERT INTO topic VALUES(NULL, ?)""", 
+                      [(line,) for line in inp.readlines() ])
         conn.commit()
         
 if __name__ == '__main__':
@@ -66,7 +84,8 @@ if __name__ == '__main__':
         dans le dossier %s""" % (arg.data_path))
 
     corpus_name = utils.split_path(tsv_corpus[0])['name']
-    conn = sqlite3.connect(corpus_name + '.db') 
+    conn = sqlite3.connect(corpus_name + '.db')  # @UndefinedVariable
     conn.text_factory = str
     
     create_documents_table(tsv_corpus[0], conn)
+    create_topics_table(topics[0], conn)
