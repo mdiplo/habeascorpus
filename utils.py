@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import nltk
 from gensim import corpora, models, similarities
 
@@ -7,6 +8,19 @@ def tokenize(texte):
     tokens_2d = [nltk.word_tokenize(sent) for sent in nltk.sent_tokenize(texte)]
     tokens = [x.lower() for sublist in tokens_2d for x in sublist if x.isalpha() and x not in set(nltk.corpus.stopwords.words('french'))]   
     return tokens
+
+def split_path(file_path):
+    """
+    Renvoie sous la forme d'un dictionnaire le nom du fichier sans l'extension,
+    le nom avec l'extension, et le chemin absolu.
+    >>> split_path('/home/bob/article.tsv')
+    {'name' : 'article', 'file_name' : 'article.tsv', 'path' : '/gome/bob/article.tsv'}
+    """
+
+    file_name = os.path.split(file_path)[1]
+    name = os.path.splitext(file_name)[0]
+    
+    return {'name' : name, 'file_name' : file_name, 'path' : file_path}
     
 def get_article(n, tsv_file):
     """Renvoie l'article dont le numéro dans le corpus est n"""
