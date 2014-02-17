@@ -6,15 +6,25 @@ Un serveur qui suit le modèle MVC, avec un Controller et un Router.
 import re
 import BaseHTTPServer
 import os.path
-from django.template import Template, Context
+import glob
+import sys
+from django.template import Context
 from django.template import loader
 from django.conf import settings
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-app_path = os.path.abspath(os.path.dirname(__file__))
-settings.configure(TEMPLATE_DIRS=(os.path.join(app_path, "templates"),))
+browser_dir = os.path.dirname(os.path.realpath(__file__))
+app_dir = os.path.dirname(browser_dir)
+data_dir = os.path.join(app_dir, 'data')
 
-TEMPLATE_DIRS = getattr(settings, "TEMPLATE_DIRS", None)
-    
+sys.path.append(os.path.join(browser_dir, 'entities'))
+
+from document import Document
+from topic import Topic
+
+settings.configure(TEMPLATE_DIRS=(os.path.join(browser_dir, "templates"),))
+
 class Router():
     
     def __init__(self, server, controller):
@@ -44,6 +54,8 @@ class Controller():
     
     def __init__(self, server):
         self.__server = server
+        #le chemin vers la base de données
+        self.__database_path = glob.glob(os.path.join(data_dir,'*.db'))[0]
         
     @property
     def server(self):
@@ -61,9 +73,18 @@ class Controller():
     # prennent donc quand même args en argument (qui sera vide). 
     #Est-ce gênant/nécessaire ?
     def voir_topics(self, args): 
+        try:
+            engine = create_engine('sqlite:///' + self.__database_path, echo=True)
+            Session = sessionmaker(bind=engine)
+            session = Session()
+            topics = [topic.get_related_words() for topic in session.query(Topic)]
+        except:
+            raise IOError('Impossible de se connecter à la base de données')
+        
         self.send_headers()
-        t = loader.get_template('voir_topics.html')
-        self.__server.wfile.write(t.render(Context()))
+        template = loader.get_template('voir_topics.html')
+        context = Context({'topics' : topics})
+        self.__server.wfile.write(template.render(context))
               
 class HabeasCorpusRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     

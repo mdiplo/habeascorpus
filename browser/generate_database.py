@@ -14,7 +14,7 @@ from sqlalchemy.orm import sessionmaker
 
 root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(root_dir) #TODO : faire fonctionner les import relatif (from .. import utils)
-entities_dir = os.path.dirname(os.path.realpath(__file__)) + '/entities'
+entities_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'entities')
 sys.path.append(entities_dir)
 
 import utils

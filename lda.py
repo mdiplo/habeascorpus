@@ -59,4 +59,4 @@ corpora.mmcorpus.MmCorpus.serialize(corpus_name + '_lda.mm', lda[corpus], progre
 topics = lda.show_topics(topics=-1, formatted=False)
 with open(corpus_name + '_topics.txt', 'w') as f:
     for topic in topics:
-        f.write(' '.join(str(x) for x in topic) + '\n')
+        f.write('\t'.join(str(x) for x in topic) + '\n')
