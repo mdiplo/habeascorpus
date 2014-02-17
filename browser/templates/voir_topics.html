@@ -1,19 +1,37 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8" />
-        <title>Topics du corpus {{ corpus.name }} </title>  		
-    </head>
-    <body>
-    	<h1>Topics du corpus {{ corpus.name }}</h1>
-    	<ol>
-    		{% for topic in topics %}
-    		<li>
-    			{% for word in topic  %}
-    			{{ word.1 }} ({{ word.0|floatformat:-3}})
-    			{% endfor %}
-    		</li>
-    		{% endfor %}
-    	</ol>
-    </body>
-</html>  	
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="page-header">
+	<h1>Topics du corpus {{ corpus.name }}</h1>
+</div>
+
+{% for topic in topics %}
+
+{% if forloop.counter0|divisibleby:6 %}
+<div class="row">
+{% endif %}
+
+	<div class="topic col-md-2">
+		<div class="panel panel-primary">
+			<div class="panel-heading">Topic {{ forloop.counter }}</div>
+			<table class="table table-bordered table-condensed table-striped">
+				<tr>
+					<th><strong>Mot</strong></th>
+					<th><strong>Score</strong></th>	
+				</tr>
+				{% for word in topic  %}
+				<tr>
+					<td>{{ word.1 }}</td>
+					<td>{{ word.0|floatformat:-3}}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+	</div>
+	
+{% if forloop.counter|divisibleby:6 or forloop.last%}
+</div>
+{% endif %}
+
+{% endfor %}
+{% endblock %}
