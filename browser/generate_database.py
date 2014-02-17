@@ -49,7 +49,8 @@ def add_documents(corpus_file, session):
         
 def add_topics(topics_file, session):
     """
-    Ajoute les topics dans la table topics à partir du fichier topics.txt généré par lda.py
+    Ajoute les topics dans la table topics à partir du fichier topics.txt généré
+    par lda.py
     
     :Parameters:
         -`topics_file`: Le fichier topics.txt contenant les topics
