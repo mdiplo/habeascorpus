@@ -64,7 +64,7 @@ class Controller():
     
     def send_headers(self):
         self.__server.send_response(200)  
-        self.__server.send_header('Content-type', 'text/html')  
+        self.__server.send_header('Content-type', 'text/html;charset=UTF-8')  
         self.__server.end_headers()
         
     #Quand on route une url, on peut avoir des arguments : par exemple,
@@ -84,14 +84,34 @@ class Controller():
         self.send_headers()
         template = loader.get_template('voir_topics.html')
         context = Context({'topics' : topics})
-        self.__server.wfile.write(template.render(context))
-              
+        self.__server.wfile.write(template.render(context).encode('utf-8'))
+        #Merci python 2 qui sait pas gérer unicode
+        
+    def voir_article(self, args):
+        try:
+            engine = create_engine('sqlite:///' + self.__database_path, echo=True)
+            Session = sessionmaker(bind=engine)
+            session = Session()
+            document = session.query(Document.titre, Document.chapo, 
+                                     Document.texte, Document.auteur).\
+                                     filter(Document.id == args['id']).\
+                                     one()
+        except:
+            raise IOError('Impossible de se connecter à la base de données')
+        
+        self.send_headers()
+        template = loader.get_template('voir_article.html')
+        context = Context({'document' : document})
+        self.__server.wfile.write(template.render(context).encode('utf-8'))
+        #Merci python 2 qui sait pas gérer unicode
+        
 class HabeasCorpusRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     
     def __init__(self, request, client_adress, server):
             
         routes = [
-                  {'regexp' : r'/topics', 'action' : 'voir_topics'}
+                  {'regexp' : r'/topics', 'action' : 'voir_topics'},
+                  {'regexp' : r'/articles/(?P<id>\d*)', 'action' : 'voir_article'}
                   ]
         
         self.__router = Router(self, Controller(self))
