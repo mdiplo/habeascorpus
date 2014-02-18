@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import utils
+import gzip
 from gensim import corpora
 
 class HabeasCorpus(corpora.TextCorpus):
@@ -11,7 +12,11 @@ class HabeasCorpus(corpora.TextCorpus):
     """
     
     def get_texts(self):
-        with open(self.input, 'r') as f:
+        if self.input.endswith('.gz'):
+            a = gzip.open(self.input, 'r')
+        else:
+            a = open(self.input, 'r')
+        with a as f:
             f.readline() #La première ligne qui contient les noms des colonnes
             for i, raw_line in enumerate(f):
                 try:
