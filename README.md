@@ -15,20 +15,22 @@ echo "SELECT a.id_article,a.titre, a.chapo,a.texte,a.lang, GROUP_CONCAT(DISTINCT
 
 voir aussi http://seenthis.net/messages/224616
 
-Une fois le fichier corpus.tsv obtenu, on le place dans le dossier `/habeascorpus/data`. On calcule la représentation bag-of-words du corpus en lançant depuis le dosier `/habeascorpus/data` :
+Une fois le fichier `corpus.tsv` obtenu, on le place dans un dossier `data` qui va contenir l'ensemble des fichiers générés par `habeascorpus`. On calcule la représentation bag-of-words du corpus en lançant depuis le dosier `data` :
 
 ```
-python ../corpus_to_matrix.py corpus.tsv -v
+python $habeascorpus/corpus_to_matrix.py corpus.tsv -v
 ```
 
-On obient ainsi dans le dossier data le fichier `corpus_wordids.txt` qui associe un id à chaque mot du corpus, et le fichier `corpus_bow.mm`, qui indique pour chaque document les mots qu'il contient.
+où `$habeascorpus` est le chemin de `habeascorpus` sur le disque dur.
+
+On obient ainsi dans le dossier `data` le fichier `corpus_wordids.txt` qui associe un id à chaque mot du corpus, et le fichier `corpus_bow.mm`, qui indique pour chaque document les mots qu'il contient.
 
 ## Calcul des topics
 
 On peut ensuite appliquer l'algorithme LDA qui détermine les topics du corpus (ici on demande 100 topics):
 
 ```
-python ../lda.py 100 corpus_bow.mm corpus_wordids.txt -v
+python $habeascorpus/lda.py 100 corpus_bow.mm corpus_wordids.txt -v
 ```
 
 Cette commande produit le fichier `corpus_lda.mm`, qui indique pour chaque document les topics qui lui sont reliés. Elle produit également le fichier `corpus_topics.txt`, qui liste les topics du corpus.
@@ -43,11 +45,10 @@ Cette commande produit le fichier `corpus_lda.mm`, qui indique pour chaque docum
 On peut maintenant explorer le corpus dans un navigateur, en générant au préalable une base de données contenant les informations nécessaires :
 
 ```
-cd habeascorpus/browser
-python generate_database.py ../data
-python server.py
+python $habeascorpus/browser/generate_database.py 
+python $habeascorpus/browser/server.py
 ```
 
-Puis on charge la page `localhost:9000` dans un navigateur web.
+Puis on charge la page `localhost:9000/topics` dans un navigateur web.
 
 
