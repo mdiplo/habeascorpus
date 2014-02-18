@@ -16,7 +16,7 @@ class Topic(Base):
     def get_related_words(self):
         """
         Renvoie les mots associés au Topic sous la forme d'une liste de tuples
-        (mot, score)
+        (score, mot)
         """
         
         return map(eval, self.related_words.split('\t'))
