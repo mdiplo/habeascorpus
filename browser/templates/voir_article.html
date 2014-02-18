@@ -9,8 +9,18 @@
 	<p class="lead"><strong>{{ document.chapo }}</strong></p>
 </div>
 
+<div>
+    {% for document_topic in document_topics %}
+    	<div class="col-md-4">
+		{% include "topic_related_words.html" with topic=document_topic.topic score=document_topic.score %}
+		</div>
+    {% endfor %}
+</div>
+
 <!-- article -->
+
 <div>
 	{{ document.texte }}
 </div>
+
 {% endblock %}

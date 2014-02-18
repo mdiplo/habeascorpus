@@ -24,7 +24,7 @@ class Document(topic.Base):
     langue = Column(String) 
     auteur = Column(String)
     mots = Column(String)
-    topics = relationship("DocumentTopic")
+    topics = relationship("DocumentTopic", order_by="-DocumentTopic.score", backref="documents")
     #date = Column(DateTime)
     
     def __init__(self, l):

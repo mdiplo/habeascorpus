@@ -75,7 +75,7 @@ class Controller():
             engine = create_engine('sqlite:///' + self.__database_path, echo=True)
             Session = sessionmaker(bind=engine)
             session = Session()
-            topics = [topic.get_related_words() for topic in session.query(Topic)]
+            topics = session.query(Topic).all()
         except:
             raise IOError('Impossible de se connecter à la base de données')
         
@@ -90,16 +90,16 @@ class Controller():
             engine = create_engine('sqlite:///' + self.__database_path, echo=True)
             Session = sessionmaker(bind=engine)
             session = Session()
-            document = session.query(Document.titre, Document.chapo, 
-                                     Document.texte, Document.auteur).\
+            document = session.query(Document).\
                                      filter(Document.id == args['id']).\
-                                     one()
+                                     one()                        
+            document_topics = document.topics[:3] #on affiche les 3 topics les plus significatifs
         except:
             raise IOError('Impossible de se connecter à la base de données')
         
         self.send_headers()
         template = loader.get_template('voir_article.html')
-        context = Context({'document' : document})
+        context = Context({'document' : document, 'document_topics' : document_topics})
         self.__server.wfile.write(template.render(context).encode('utf-8'))
         #Merci python 2 qui sait pas gérer unicode
         
