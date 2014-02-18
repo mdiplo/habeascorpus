@@ -65,11 +65,7 @@ def add_topics(topics_file, session):
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Génère la base de données sqlite 
-    d'exploration d'un corpus""");
-    parser.add_argument('data_path', type=str, help="""Le dossier contenant les
-     données calculées sur le corpus. Ce dossier doit contenir :
-         - le corpus au format .tsv
-         - le fichier topics.txt généré par lda.py""")
+    d'exploration d'un corpus.""");
     parser.add_argument('-v', '--verbose', action='store_true',
                     help="Afficher les messages d'information")
     arg = parser.parse_args()
@@ -77,17 +73,17 @@ if __name__ == '__main__':
     if arg.verbose:
         logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     
-    tsv_corpus = glob.glob(arg.data_path + '/*.tsv')
-    topics = glob.glob(arg.data_path + '/*_topics.txt')
+    tsv_corpus = glob.glob('*.tsv')
+    topics = glob.glob('*_topics.txt')
     
     if not tsv_corpus:
         raise IOError("""Impossible de trouver le fichier .tsv
-        dans le dossier %s""" % (arg.data_path))
+        dans le dossier %s""" % (os.getcwd()))
     if not topics:
         raise IOError("""Impossible de trouver le fichier topics.txt 
-        dans le dossier %s""" % (arg.data_path))
-
-    corpus_name = utils.split_path(tsv_corpus[0])['name']
+        dans le dossier %s""" % (os.getcwd()))
+        
+    corpus_name = os.path.splitext(tsv_corpus[0])[0]
     
     engine = create_engine('sqlite:///%s.db' % (corpus_name), echo=False)
     Session = sessionmaker(bind=engine)

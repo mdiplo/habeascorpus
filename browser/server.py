@@ -15,8 +15,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 browser_dir = os.path.dirname(os.path.realpath(__file__))
-app_dir = os.path.dirname(browser_dir)
-data_dir = os.path.join(app_dir, 'data')
 
 sys.path.append(os.path.join(browser_dir, 'entities'))
 
@@ -55,7 +53,7 @@ class Controller():
     def __init__(self, server):
         self.__server = server
         #le chemin vers la base de données
-        self.__database_path = glob.glob(os.path.join(data_dir,'*.db'))[0]
+        self.__database_path = glob.glob('*.db')[0]
         
     @property
     def server(self):
@@ -124,6 +122,12 @@ class HabeasCorpusRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.__router.route(self.path)  
                 
 if __name__ == '__main__':
+    
+    #Si la base de données n'existe pas, on stop
+    database = glob.glob('*.db')
+    if not database:
+        raise IOError("Base de données introuvable dans le dossier %s" % (os.getcwd()))
+    
     adress = ('', 9000)
     httpd = BaseHTTPServer.HTTPServer(adress, HabeasCorpusRequestHandler)
     httpd.serve_forever()
