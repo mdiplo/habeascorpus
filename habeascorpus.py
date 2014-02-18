@@ -12,11 +12,7 @@ class HabeasCorpus(corpora.TextCorpus):
     """
     
     def get_texts(self):
-        if self.input.endswith('.gz'):
-            a = gzip.open(self.input, 'r')
-        else:
-            a = open(self.input, 'r')
-        with a as f:
+        with file_read(self.input) as f:
             f.readline() #La première ligne qui contient les noms des colonnes
             for i, raw_line in enumerate(f):
                 try:
@@ -29,3 +25,9 @@ class HabeasCorpus(corpora.TextCorpus):
     
 
 
+
+def file_read(f):
+    if f.endswith('.gz'):
+        return gzip.open(f, 'r')
+    else:
+        return open(f, 'r')

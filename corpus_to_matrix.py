@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-À partir d'un corpus de textes donné sous la forme d'un fichier csv 
+À partir d'un corpus de textes donné sous la forme d'un fichier tsv 
 contenant un texte par ligne, on génère trois fichiers :
 
     - nom_du_corpus_wordids.txt : un tableau associant à chaque mot du corpus
@@ -12,7 +12,7 @@ contenant un texte par ligne, on génère trois fichiers :
     apparaît dans le document.
     
     - nom_du_corpus_docnums.txt : un fichier contenant un entier par ligne.
-    L'entier à la ligne i est l'id_article (donné dans le fichier csv) du document
+    L'entier à la ligne i est l'id_article (donné dans le fichier tsv) du document
     n°i du corpus.
 """
 
@@ -26,7 +26,7 @@ from gensim import corpora
 
 parser = argparse.ArgumentParser(description="""Génère la représentation matricielle 
 associée à un corpus""");
-parser.add_argument('file_path', type=str, help='Le fichier .csv contenant le corpus')
+parser.add_argument('file_path', type=str, help='Le fichier .tsv(.gz) contenant le corpus')
 parser.add_argument('-v', '--verbose', action='store_true',
                     help="Afficher les messages d'information")
 arg = parser.parse_args()
@@ -39,8 +39,8 @@ input_file = utils.split_path(arg.file_path)
 if (os.path.isfile(input_file['name'] + '_bow.mm')):
     raise IOError("Le corpus existe déjà sous forme matricielle")
 
-with open(input_file['path'], 'r') as f, open(input_file['name'] + '_docnums.txt', 'w') as num_articles:
-    f.readline() #On passe la première ligne qui contient le nom des colonnes
+with habeascorpus.file_read(input_file['path']) as f, open(input_file['name'] + '_docnums.txt', 'w') as num_articles:
+    f.readline() # On ignore la première ligne, qui contient le nom des colonnes
     for i, raw_line in enumerate(f):
         try : 
             id_article = raw_line.split('\t')[0]

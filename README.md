@@ -1,10 +1,9 @@
-habeascorpus
-============
+# habeascorpus
 
 analyse un corpus de textes avec gensim, et fait des trucs avec
 
-
-le corpus se présente sous la forme d'un grand fichier #TSV (un article par ligne)
+## Préparation des données
+le corpus se présente sous la forme d'un grand fichier TSV (un article par ligne)
 
 Pour SPIP on peut exporter sa base comme suit :
 
@@ -24,6 +23,8 @@ python ../corpus_to_matrix.py corpus.tsv -v
 
 On obient ainsi dans le dossier data le fichier `corpus_wordids.txt` qui associe un id à chaque mot du corpus, et le fichier `corpus_bow.mm`, qui indique pour chaque document les mots qu'il contient.
 
+## Calcul des topics
+
 On peut ensuite appliquer l'algorithme LDA qui détermine les topics du corpus (ici on demande 100 topics):
 
 ```
@@ -32,6 +33,13 @@ python ../lda.py 100 corpus_bow.mm corpus_wordids.txt -v
 
 Cette commande produit le fichier `corpus_lda.mm`, qui indique pour chaque document les topics qui lui sont reliés. Elle produit également le fichier `corpus_topics.txt`, qui liste les topics du corpus.
 
+## Explorateur de topics
+
+### Installation
+`pip install SQLAlchemy`
+`pip install Django`
+
+### Utilisation
 On peut maintenant explorer le corpus dans un navigateur, en générant au préalable une base de données contenant les informations nécessaires :
 
 ```
