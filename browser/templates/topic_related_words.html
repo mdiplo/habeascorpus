@@ -1,8 +1,8 @@
 <!-- Affiche une boîte qui contient le numéro du topic, et un tableau contenant
 les mots reliés au topic avec pour chacun le score associé -->
 
-<div class="panel panel-primary">
-	<div class="panel-heading">Topic {{ topic.id }} 
+<div class="panel panel-default">
+	<div class="panel-heading"><a href="/topics/{{ topic.id }}">Topic {{ topic.id }}</a> 
 		{% if score	%} (Score = {{ score|floatformat:-3 }}) {% endif %}
 	</div>
 	<table class="table table-bordered table-condensed table-striped">

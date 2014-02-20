@@ -1,0 +1,14 @@
+<!-- Affiche des détails sur un topic -->
+{% extends "layout.html" %}
+
+{% block body %}
+
+{% include "topic_related_words.html" with topic=topic %}
+
+{% for document in related_documents %}
+<h2><a href="/articles/{{ document.id }}">{{ document.titre }}</a></h2>
+<p>{{ document.chapo }}</p>
+<hr>
+{% endfor %}
+
+{% endblock %}	

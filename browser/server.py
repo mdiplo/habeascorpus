@@ -18,7 +18,7 @@ browser_dir = os.path.dirname(os.path.realpath(__file__))
 
 sys.path.append(os.path.join(browser_dir, 'entities'))
 
-from document import Document
+from document import Document, DocumentTopic
 from topic import Topic
 
 settings.configure(TEMPLATE_DIRS=(os.path.join(browser_dir, "templates"),))
@@ -71,6 +71,11 @@ class Controller():
     # prennent donc quand même args en argument (qui sera vide). 
     #Est-ce gênant/nécessaire ?
     def voir_topics(self, args): 
+        """
+        Charge la page voir_topics.html qui affiche tous les topics du corpus
+        
+        """
+
         try:
             engine = create_engine('sqlite:///' + self.__database_path, echo=True)
             Session = sessionmaker(bind=engine)
@@ -84,6 +89,39 @@ class Controller():
         context = Context({'topics' : topics})
         self.__server.wfile.write(template.render(context).encode('utf-8'))
         #Merci python 2 qui sait pas gérer unicode
+        
+    def details_topic(self, args):
+        """
+        Charge la page details_topic.html qui affiche les détails d'un topic donné
+        
+        :Parameters:
+            -`args['id']` : l'id du topic dont on veut les détails
+        """
+        
+        try:
+            engine = create_engine('sqlite:///' + self.__database_path, echo=True)
+            Session = sessionmaker(bind=engine)
+            session = Session()
+            
+            topic = session.query(Topic).\
+                            filter(Topic.id == args['id']).\
+                            one()
+    
+            related_documents = session.query(Document).\
+                                    join(Document.topics).\
+                                    join(DocumentTopic.topic).\
+                                    filter(Topic.id == args['id']).\
+                                    order_by(-DocumentTopic.score).\
+                                    limit(10).\
+                                    all()                   
+                                    
+        except:
+            raise IOError('Impossible de se connecter à la base de données')
+        
+        self.send_headers()
+        template = loader.get_template('details_topic.html')
+        context = Context({'topic': topic, 'related_documents' : related_documents})
+        self.__server.wfile.write(template.render(context).encode('utf-8'))
         
     def voir_article(self, args):
         try:
@@ -108,6 +146,7 @@ class HabeasCorpusRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def __init__(self, request, client_adress, server):
             
         routes = [
+                  {'regexp' : r'/topics/(?P<id>\d*)', 'action' : 'details_topic'},
                   {'regexp' : r'/topics', 'action' : 'voir_topics'},
                   {'regexp' : r'/articles/(?P<id>\d*)', 'action' : 'voir_article'}
                   ]
