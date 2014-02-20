@@ -55,8 +55,9 @@ except Exception:
 
 lda = models.ldamodel.LdaModel(corpus=corpus,id2word=id2word,
                                        num_topics=args.nb_topics, passes=args.nb_passes) 
+lda.save(corpus_name + '_ldamodel')
 corpora.mmcorpus.MmCorpus.serialize(corpus_name + '_lda.mm', lda[corpus], progress_cnt=1000)
-topics = lda.show_topics(topics=-1, formatted=False)
+
 with open(corpus_name + '_topics.txt', 'w') as f:
-    for topic in topics:
-        f.write('\t'.join(str(x) for x in topic) + '\n')
+    for i in range(args.nb_topics):
+        f.write('\t'.join(str(x) for x in lda.show_topic(i)) + '\n')

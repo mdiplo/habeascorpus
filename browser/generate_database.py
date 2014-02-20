@@ -33,15 +33,15 @@ def add_topics(topics_file, session):
         -`session`: L'objet Sonnexion de sqlalchemy
         
     :return:
-        La liste l telle que l[i] = Topic(id = i+1)
+        La liste l telle que l[i] = Topic(id = i)
     
     """
     
     topics = []
     
     with open(topics_file, 'r') as inp:
-        for line in inp:
-            topic = Topic(related_words = line)
+        for i, line in enumerate(inp):
+            topic = Topic(id=i, related_words = line)
             session.add(topic)
             topics.append(topic)
         session.commit()
@@ -65,7 +65,7 @@ def add_documents(raw_corpus_file, lda_corpus_file, topics, session):
     :Parameters:
         -`raw_corpus_file`: Le fichier .tsv contenant les documents
         -`lda_corpus_file`: Le fichier _lda.mm 
-        -`topics` : Une liste l contenant tous les topics telle que l[i] = Topic(id = i+1)
+        -`topics` : Une liste l contenant tous les topics telle que l[i] = Topic(id = i)
         -`session`: L'objet Session de sqlalchemy'
 
     """
@@ -84,7 +84,7 @@ def add_documents(raw_corpus_file, lda_corpus_file, topics, session):
             doc = Document(raw_line.split('\t'))
             for id_topic, score in lda[docno]:
                 doc_topic = DocumentTopic(score=score)
-                doc_topic.topic = topics[id_topic - 1]
+                doc_topic.topic = topics[id_topic]
                 doc.topics.append(doc_topic)
             session.add(doc)
             
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         
     corpus_name = os.path.splitext(tsv_corpus[0])[0]
     
-    engine = create_engine('sqlite:///%s.db' % (corpus_name), echo=False)
+    engine = create_engine('sqlite:///%s.db' % (corpus_name), echo=arg.verbose)
     Session = sessionmaker(bind=engine)
     session = Session()
     
