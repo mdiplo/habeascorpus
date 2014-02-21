@@ -39,16 +39,11 @@ input_file = utils.split_path(arg.file_path)
 if (os.path.isfile(input_file['name'] + '_bow.mm')):
     raise IOError("Le corpus existe déjà sous forme matricielle")
 
-with habeascorpus.file_read(input_file['path']) as f, open(input_file['name'] + '_docnums.txt', 'w') as num_articles:
+with habeascorpus.file_read(input_file['path']) as f:
     f.readline() # On ignore la première ligne, qui contient le nom des colonnes
     for i, raw_line in enumerate(f):
-        try : 
-            id_article = raw_line.split('\t')[0]
-        except Exception: 
-            raise ValueError("La ligne n°%d n'est pas au bon format" % (i+1))
-        
-        num_articles.write(id_article + '\n')
-        
+        id_article = raw_line.split('\t')[0]
+
 corpus = habeascorpus.HabeasCorpus(input_file['path'])
 corpus.dictionary.filter_extremes(no_below=3, no_above=0.5)
 corpus.dictionary.save_as_text(input_file['name'] + '_wordids.txt')
