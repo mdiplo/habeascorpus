@@ -126,3 +126,7 @@ if __name__ == '__main__':
     topics = add_topics(topics[0], session)
     
     add_documents(tsv_corpus[0], lda_corpus[0], topics, session)
+    
+    #On calcule pour chaque topic son poids total dans le corpus
+    for topic in topics:
+        topic.set_total_weight(session)

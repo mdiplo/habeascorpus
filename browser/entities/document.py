@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Float
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
 import sys, os.path
@@ -47,6 +47,6 @@ class DocumentTopic(topic.Base):
     
     document_id = Column(Integer, ForeignKey('documents.id'), primary_key=True)
     topic_id = Column(Integer, ForeignKey('topics.id'), primary_key=True)
-    score = Column(Integer) #valeur de topic_id pour le document document_id
+    score = Column(Float) #valeur de topic_id pour le document document_id
     topic = relationship("Topic")
     

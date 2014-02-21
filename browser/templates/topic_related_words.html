@@ -3,7 +3,8 @@ les mots reliés au topic avec pour chacun le score associé -->
 
 <div class="panel panel-default">
 	<div class="panel-heading"><a href="/topics/{{ topic.id }}">Topic {{ topic.id }}</a> 
-		{% if score	%} (Score = {{ score|floatformat:-3 }}) {% endif %}
+		{% if score	%} (Score pour cet article = {{ score|floatformat:-3 }}), {% endif %}
+		(Poids du topic dans le corpus = {{ topic.total_weight }})
 	</div>
 	<table class="table table-bordered table-condensed table-striped">
 		<tr>
