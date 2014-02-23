@@ -16,6 +16,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import desc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.expression import extract
+from sqlalchemy.sql import func
 
 browser_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -121,7 +122,8 @@ class Controller():
                                 limit(10).\
                                 all()     
                                 
-        topic_history = session.query(DocumentTopic.score, extract('year', Document.date).label('year')).\
+        topic_history = session.query(func.sum(DocumentTopic.score), 
+                                      extract('year', Document.date).label('year')).\
                                 join(Document).\
                                 join(Topic).\
                                 filter(Topic.id == args['id']).\
@@ -130,7 +132,7 @@ class Controller():
         
         topic_history = [{'value' : score, 'date': year}
                           for score, year in topic_history]       
-        
+        print topic_history
         self.send_headers()
         template = loader.get_template('details_topic.html')
         context = Context({'topic': topic,
