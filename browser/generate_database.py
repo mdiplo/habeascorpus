@@ -81,7 +81,7 @@ def add_documents(raw_corpus_file, lda_corpus_file, topics, session):
             #lda[docno] donne les topics associés au document raw_line sous la forme
             #d'une liste de tuples (id_topic, score)  
             
-            doc = Document(raw_line.split('\t'))
+            doc = Document(raw_line.rstrip().split('\t'))
             for id_topic, score in lda[docno]:
                 doc_topic = DocumentTopic(score=score)
                 doc_topic.topic = topics[id_topic]

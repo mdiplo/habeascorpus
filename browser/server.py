@@ -8,11 +8,14 @@ import BaseHTTPServer
 import os.path
 import glob
 import sys
+import json
 from django.template import Context
 from django.template import loader
 from django.conf import settings
 from sqlalchemy import create_engine
+from sqlalchemy import desc
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql.expression import extract
 
 browser_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -103,24 +106,37 @@ class Controller():
             Session = sessionmaker(bind=engine)
             session = Session()
             
-            topic = session.query(Topic).\
-                            filter(Topic.id == args['id']).\
-                            one()
-    
-            related_documents = session.query(Document).\
-                                    join(Document.topics).\
-                                    join(DocumentTopic.topic).\
-                                    filter(Topic.id == args['id']).\
-                                    order_by(-DocumentTopic.score).\
-                                    limit(10).\
-                                    all()                   
-                                    
         except:
             raise IOError('Impossible de se connecter à la base de données')
+            
+        topic = session.query(Topic).\
+                        filter(Topic.id == args['id']).\
+                        one()
+
+        related_documents = session.query(Document).\
+                                join(Document.topics).\
+                                join(DocumentTopic.topic).\
+                                filter(Topic.id == args['id']).\
+                                order_by(desc(DocumentTopic.score)).\
+                                limit(10).\
+                                all()     
+                                
+        topic_history = session.query(DocumentTopic.score, extract('year', Document.date).label('year')).\
+                                join(Document).\
+                                join(Topic).\
+                                filter(Topic.id == args['id']).\
+                                group_by("year").\
+                                all()        
+        
+        topic_history = [{'value' : score, 'date': year}
+                          for score, year in topic_history]       
         
         self.send_headers()
         template = loader.get_template('details_topic.html')
-        context = Context({'topic': topic, 'related_documents' : related_documents})
+        context = Context({'topic': topic,
+                           'related_documents' : related_documents,
+                           'topic_history' : json.dumps(topic_history)}
+                          );
         self.__server.wfile.write(template.render(context).encode('utf-8'))
         
     def voir_article(self, args):
@@ -158,7 +174,27 @@ class HabeasCorpusRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request, client_adress, server) 
         
     def do_GET(self):  
-        self.__router.route(self.path)  
+        
+        browser_dir = os.path.dirname(os.path.realpath(__file__))
+        
+        if self.path.endswith('.js'):
+            js_file = self.path.lstrip('/')
+            with open(os.path.join(browser_dir, js_file)) as js_file:
+                self.send_response(200)
+                self.send_header('Content-type', 'text/javascript')
+                self.end_headers()
+                self.wfile.write(js_file.read())
+                
+        elif self.path.endswith('.css'):
+            css_file = self.path.lstrip('/')
+            with open(os.path.join(browser_dir, css_file)) as css_file:
+                self.send_response(200)
+                self.send_header('Content-type', 'text/css')
+                self.end_headers()
+                self.wfile.write(css_file.read())
+            
+        else:
+            self.__router.route(self.path) 
                 
 if __name__ == '__main__':
     

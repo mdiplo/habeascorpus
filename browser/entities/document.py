@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import Column, Integer, String, DateTime, Float
+from sqlalchemy import Column, Integer, String, Date, Float
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
+from datetime import datetime
 import sys, os.path
 
 entities = os.path.dirname(os.path.realpath(__file__))
@@ -24,8 +25,8 @@ class Document(topic.Base):
     langue = Column(String) 
     auteur = Column(String)
     mots = Column(String)
+    date = Column(Date)
     topics = relationship("DocumentTopic", order_by="-DocumentTopic.score", backref="documents")
-    #date = Column(DateTime)
     
     def __init__(self, l):
         self.id = int(l[0])
@@ -35,8 +36,12 @@ class Document(topic.Base):
         self.langue = l[4].decode('utf-8')
         self.auteur = l[5].decode('utf-8')
         self.mots = l[6].decode('utf-8')
-        #self.date = l[7]
-        
+        try:
+            self.date = datetime.strptime(l[7].decode('utf-8'), '%Y-%m')
+        except ValueError:
+            self.date = datetime(1, 1, 1)
+            #python n'accepte pas la date 0000-00, on la remplace par 0000-01
+            
 class DocumentTopic(topic.Base):
     """
     Cette classe représente la relation many-to-many entre la classe Document 
