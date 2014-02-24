@@ -3,6 +3,12 @@
 
 {% block stylesheets %}
 <link rel="stylesheet" href="../css/charts.css">
+<style>
+svg { 
+    display: block;
+    margin: auto;
+}
+</style>
 {% endblock %}
 
 {% block body %}
@@ -10,32 +16,89 @@
 	<h1>Topics du corpus {{ corpus.name }}</h1>
 </div>
 
-{% for topic in topics %}
+<div id="topics_viz"></div>
 
-{% if forloop.counter0|divisibleby:6 %}
-<div class="row">
-{% endif %}
-	
-	<!--topic-->
-	<div class="topic col-md-2"></div>
-	
-{% if forloop.counter|divisibleby:6 or forloop.last%}
-</div>
-{% endif %}
-
-{% endfor %}
 {% endblock %}
 
 {% block scripts %}
 <script src="../js/pie_chart.js"></script>
 <script>
-    var data = Array();
-    {% for topic in topics %}
-        data.push({{ topic.related_words|safe}});
-    {% endfor %}
+    //représente les topics sous forme d'un diagramme bâtons horizontal
+    var margin = {top: 30, right: 10, bottom: 10, left: 10},
+    width = 1000 - margin.left - margin.right,
+    height = 2500 - margin.top - margin.bottom,
+    min_bar_length = 100;
+    
+    var topics = {{ topics|safe }};
+    
+    topics.sort(function(a, b) { return b.total_weight - a.total_weight; });
+    
+    var max_weight = d3.max(topics, function (d) { return d.total_weight; }),
+    min_weight = d3.min(topics, function (d) { return d.total_weight; }),
+    abs_origine = (min_bar_length*max_weight - width*min_weight)/(max_weight - min_weight);
+    
+    var x = d3.scale.linear()
+        .range([min_bar_length, width])
+        .domain([min_weight, max_weight]);
 
-	var chart = pieChart();
-	d3.selectAll('.topic').data(data).call(chart);
+
+    var y = d3.scale.ordinal()
+        .rangeRoundBands([0, height], 0.1)
+        .domain(topics.map(function (d) { return d.id;}));
+    
+    topics.forEach(function (d) {
+        total_words_weights = d3.sum(d.related_words, function (w) { return w.topic_score; });
+	    var c = 0;
+	    d.related_words.forEach(function (w) {
+	       w.x0 = c 
+	       w.x1 = w.x0 + x(d.total_weight*w.topic_score/total_words_weights);
+	       
+	       c = w.x1;
+	       
+	       w.total_weight = d.total_weight;
+	     
+	    });
+	    
+    });
+    
+    var color = d3.scale.ordinal()
+    .range(["#e1811d","#eaa660", "#f3cca4"]);
+    
+    console.log(abs_origine);
+     
+    var svg = d3.select("#topics_viz").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+    var t = svg.selectAll(".topic")
+    .data(topics)
+  .enter().append("svg:a")
+    .attr("xlink:href", function(d){return '/topics/' + d.id ;})
+    .attr("transform", function(d) { 
+        return "translate(" + (x((max_weight - d.total_weight)/2) -2*x(0)) + ", " + y(d.id) + ")"; }
+     );   
+    
+    t.selectAll("rect")
+    .data(function(d) { return d.related_words; })
+    .enter().append("rect")
+    .attr("height", y.rangeBand())
+    .attr("x", function(d) { return d.x0; })
+    .attr("width", function(d) { return (d.x1 - d.x0);})
+    .style("fill", function(d, i) { return color(i); })
+    
+    t.selectAll("text")
+    .data(function (d) { return d.related_words; })
+    .enter().append("text")
+    .attr("x", function (d) { return (d.x0+d.x1)/2; })
+    .attr("y", function () { return y.rangeBand()/2;})
+    .attr("dy", ".3em")
+    .style("text-anchor", "middle")
+    .style("fill", "black")
+    .text(function (d) { return d.word; });
+    
+ 
 </script>
 {% endblock %}
     
