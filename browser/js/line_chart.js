@@ -4,7 +4,7 @@ function lineChart(data) {
     width = 760,
     height = 400
     
-        var parseDate = d3.time.format("%Y").parse;
+    var parseDate = d3.time.format("%Y").parse;
     
     data.forEach(function(d) {
         d.date = parseDate(String(d.date));

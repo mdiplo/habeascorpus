@@ -90,6 +90,8 @@ class Controller():
         
         self.send_headers()
         template = loader.get_template('voir_topics.html')
+        topics = [{'id' : topic.id, 'total_weight' : topic.total_weight,
+                   'related_words' : topic.get_related_words(3)} for topic in topics]
         context = Context({'topics' : topics})
         self.__server.wfile.write(template.render(context).encode('utf-8'))
         #Merci python 2 qui sait pas gérer unicode

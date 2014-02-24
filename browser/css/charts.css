@@ -20,3 +20,6 @@
   stroke-width: 1.5px;
 }
 
+.arc path {
+  stroke: #fff;
+}

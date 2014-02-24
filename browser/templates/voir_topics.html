@@ -1,6 +1,10 @@
 <!-- Affiche tous les topics du corpus -->
 {% extends "layout.html" %}
 
+{% block stylesheets %}
+<link rel="stylesheet" href="../css/charts.css">
+{% endblock %}
+
 {% block body %}
 <div class="page-header">
 	<h1>Topics du corpus {{ corpus.name }}</h1>
@@ -13,9 +17,7 @@
 {% endif %}
 	
 	<!--topic-->
-	<div class="col-md-2">
-		{% include "topic_related_words.html" with topic=topic %}
-	</div>
+	<div class="topic col-md-2"></div>
 	
 {% if forloop.counter|divisibleby:6 or forloop.last%}
 </div>
@@ -23,3 +25,17 @@
 
 {% endfor %}
 {% endblock %}
+
+{% block scripts %}
+<script src="../js/pie_chart.js"></script>
+<script>
+    var data = Array();
+    {% for topic in topics %}
+        data.push({{ topic.related_words|safe}});
+    {% endfor %}
+
+	var chart = pieChart();
+	d3.selectAll('.topic').data(data).call(chart);
+</script>
+{% endblock %}
+    
