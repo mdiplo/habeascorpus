@@ -1,97 +1,25 @@
 <!-- Affiche tous les topics du corpus -->
 {% extends "layout.html" %}
 
-{% block stylesheets %}
-<link rel="stylesheet" href="../css/charts.css">
-<style>
-svg { 
-    border: 1px solid black;
-    display: block;
-    margin: auto;
-}
-
-a:link { 
-    text-decoration: none;
-}
-</style>
-{% endblock %}
-
 {% block body %}
 <div class="page-header">
-	<h1>Topics du corpus {{ corpus.name }}</h1>
+<h1>Topics du corpus {{ corpus.name }}</h1>
 </div>
 
-<div id="words_viz"></div>
+{% for topic in topics %}
 
+{% if forloop.counter0|divisibleby:6 %}
+<div class="row">
+{% endif %}
+
+<!--topic-->
+<div class="col-md-2">
+{% include "topic_related_words.html" with topic=topic %}
+</div>
+
+{% if forloop.counter|divisibleby:6 or forloop.last%}
+</div>
+{% endif %}
+
+{% endfor %}
 {% endblock %}
-
-{% block scripts %}
-<script src="../js/pie_chart.js"></script>
-<script src="../lib/d3/d3.layout.cloud.js"></script>
-<script>
-
-    var margin = {top: 10, right: 10, bottom: 10, left: 10},
-    width = 960 - margin.left - margin.right,
-    height = 700 - margin.top - margin.bottom;
-    
-    var fill = d3.scale.category20();
-    
-    var words = {{ words|safe}};
-
-    var min_weight = d3.min(words, function (d) { return d.weight; }),
-        max_weight = d3.max(words, function (d) { return d.weight; });
-    
-    var size = d3.scale.linear()
-        .range([10, width/2])
-        .domain([min_weight, max_weight]);
-        
-    d3.layout.cloud()
-    .timeInterval(10)
-    .size([width, height])
-    .padding(2)
-    .font("Impact")
-    .fontSize(function(d) { return d.size; })
-    .words( words.map(function(d) {
-        return {id_topic: d.id_topic, text: d.word, size: size(d.weight)};
-      }))
-    .on("end", draw)
-    .start();
-
-    function draw(words) {
-	    d3.select("#words_viz").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-	      .append("g")
-	       .attr("transform", "translate(" + (width+margin.left+margin.right)/2 +', ' + (height+margin.top+margin.bottom)/2 + ")")
-          .selectAll("text")
-            .data(words)
-          .enter().append("a")
-            .attr("xlink:href", function (d) { return "/topics/" + d.id_topic; })
-            .append("text")
-            .style("font-size", function(d) { return d.size + "px"; })
-            .style("font-family", "Impact")
-            .style("fill", function(d) { return fill(d.id_topic); })
-            .attr("text-anchor", "middle")
-            .attr("transform", function(d) {
-              return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-            })
-            .text(function(d) { return d.text; })
-            .on('mouseover', over)
-            .on('mouseout', out);
-    }
-    
-    function over(d) { 
-        d3.selectAll('text').filter(function (e) { return e.id_topic != d.id_topic;})
-            .style("opacity", "0.1");
-    }
-    
-    function out(d) { 
-        d3.selectAll('text').filter(function (e) { return e.id_topic != d.id_topic;})
-            .style("opacity", "1");
-    }
-  
-</script>
-
-
-{% endblock %}
-    

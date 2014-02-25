@@ -74,9 +74,33 @@ class Controller():
     #systématiquement actions(args). Les actions qui n'ont pas besoin d'argument
     # prennent donc quand même args en argument (qui sera vide). 
     #Est-ce gênant/nécessaire ?
+    def words_cloud(self, args): 
+        """
+        Charge la page words_cloud.html qui affiche un nuage contenant les mots
+        représentatifs des topics du corpus.
+        
+        """
+
+        try:
+            engine = create_engine('sqlite:///' + self.__database_path, echo=True)
+            Session = sessionmaker(bind=engine)
+            session = Session()
+            topics = session.query(Topic).all()
+        except:
+            raise IOError('Impossible de se connecter à la base de données')
+        
+        self.send_headers()
+        template = loader.get_template('words_cloud.html')
+        words = [{'id_topic' : topic.id, 'weight' : topic.weight_in_corpus*word['weight_in_topic'],
+                   'word' : word['word']} for topic in topics 
+                 for word in topic.get_related_words(3)]
+        context = Context({'words' : words})
+        self.__server.wfile.write(template.render(context).encode('utf-8'))
+        #Merci python 2 qui sait pas gérer unicode
+        
     def voir_topics(self, args): 
         """
-        Charge la page voir_topics.html qui affiche tous les topics du corpus
+        Charge la page voir_topics.html qui affiche la liste des topics du corpus
         
         """
 
@@ -90,10 +114,7 @@ class Controller():
         
         self.send_headers()
         template = loader.get_template('voir_topics.html')
-        words = [{'id_topic' : topic.id, 'weight' : topic.weight_in_corpus*word['weight_in_topic'],
-                   'word' : word['word']} for topic in topics 
-                 for word in topic.get_related_words(3)]
-        context = Context({'words' : words})
+        context = Context({'topics' : topics})
         self.__server.wfile.write(template.render(context).encode('utf-8'))
         #Merci python 2 qui sait pas gérer unicode
         
@@ -168,7 +189,8 @@ class HabeasCorpusRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             
         routes = [
                   {'regexp' : r'/topics/(?P<id>\d*)', 'action' : 'details_topic'},
-                  {'regexp' : r'/topics', 'action' : 'voir_topics'},
+                  {'regexp' : r'/topics$', 'action' : 'voir_topics'},
+                  {'regexp' : r'/cloud', 'action' : 'words_cloud'},
                   {'regexp' : r'/articles/(?P<id>\d*)', 'action' : 'voir_article'}
                   ]
         
