@@ -95,9 +95,9 @@ if __name__ == '__main__':
     d'exploration d'un corpus.""");
     parser.add_argument('-v', '--verbose', action='store_true',
                     help="Afficher les messages d'information")
-    arg = parser.parse_args()
+    args = parser.parse_args()
     
-    if arg.verbose:
+    if args.verbose:
         logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     
     tsv_corpus = glob.glob('*.tsv')
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         
     corpus_name = os.path.splitext(tsv_corpus[0])[0]
     
-    engine = create_engine('sqlite:///%s.db' % (corpus_name), echo=arg.verbose)
+    engine = create_engine('sqlite:///%s.db' % (corpus_name), echo=args.verbose)
     Session = sessionmaker(bind=engine)
     session = Session()
     

@@ -27,24 +27,26 @@ from gensim import corpora
 parser = argparse.ArgumentParser(description="""Génère la représentation matricielle 
 associée à un corpus""");
 parser.add_argument('file_path', type=str, help='Le fichier .tsv(.gz) contenant le corpus')
+parser.add_argument('--stopwords', type=str, help='Un fichier contenant un stopword par ligne')
 parser.add_argument('-v', '--verbose', action='store_true',
                     help="Afficher les messages d'information")
-arg = parser.parse_args()
+args = parser.parse_args()
 
-if arg.verbose:
+if args.verbose:
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-input_file = utils.split_path(arg.file_path)
+input_file = utils.split_path(args.file_path)
 
 if (os.path.isfile(input_file['name'] + '_bow.mm')):
     raise IOError("Le corpus existe déjà sous forme matricielle")
 
-with habeascorpus.file_read(input_file['path']) as f:
-    f.readline() # On ignore la première ligne, qui contient le nom des colonnes
-    for i, raw_line in enumerate(f):
-        id_article = raw_line.split('\t')[0]
+if args.stopwords:
+    with open(args.stopwords) as f:
+        stopwords = [line.rstrip() for line in f]
+else:
+    stopwords = []
 
-corpus = habeascorpus.HabeasCorpus(input_file['path'])
+corpus = habeascorpus.HabeasCorpus(input_file['path'], stopwords)
 corpus.dictionary.filter_extremes(no_below=3, no_above=0.5)
 corpus.dictionary.save_as_text(input_file['name'] + '_wordids.txt')
 corpora.mmcorpus.MmCorpus.serialize(input_file['name'] + '_bow.mm', corpus, progress_cnt=1000)

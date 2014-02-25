@@ -3,16 +3,20 @@ import os
 import nltk
 from gensim import corpora, models, similarities
 
-def tokenize(texte, stem=True):
+def tokenize(texte, stopwords=None, stem=False):
     """
     Renvoie un texte sous forme de liste de mots, en retirant les mots trop 
     communs (ex: le, la, est,...).
-    Si stem=True, les mots sont stemmatisés
+    Si stem=True, les mots sont stemmatisés.
+    
+    :Parameters:
+    -`stopwords` : ensemble de stopwords à ignorer 
     
     """
+    
     tokens_2d = [nltk.word_tokenize(sent) for sent in nltk.sent_tokenize(texte)]
     tokens = [x.lower() for sublist in tokens_2d for x in sublist 
-              if x.isalpha() and x not in set(nltk.corpus.stopwords.words('french'))]   
+              if x.isalpha() and x.lower() not in stopwords]   
     if stem:
         stemmer = nltk.stem.snowball.FrenchStemmer()
         tokens = map(stemmer.stem, tokens)
