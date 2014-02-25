@@ -79,11 +79,11 @@ def add_documents(raw_corpus_file, lda_corpus_file, topics, session):
         raw.readline() #on ignore la première ligne qui contient les noms des colonnes
         for docno, raw_line in enumerate(raw):
             #lda[docno] donne les topics associés au document raw_line sous la forme
-            #d'une liste de tuples (id_topic, score)  
+            #d'une liste de tuples (id_topic, poids du topic id_topic dans le document docno)  
             
             doc = Document(raw_line.rstrip().split('\t'))
-            for id_topic, score in lda[docno]:
-                doc_topic = DocumentTopic(score=score)
+            for id_topic, weight_in_document in lda[docno]:
+                doc_topic = DocumentTopic(weight_in_document=weight_in_document)
                 doc_topic.topic = topics[id_topic]
                 doc.topics.append(doc_topic)
             session.add(doc)
@@ -129,4 +129,4 @@ if __name__ == '__main__':
     
     #On calcule pour chaque topic son poids total dans le corpus
     for topic in topics:
-        topic.set_total_weight(session)
+        topic.set_weight_in_corpus(session)

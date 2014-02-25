@@ -1,20 +1,19 @@
 <!-- Affiche une boîte qui contient le numéro du topic, et un tableau contenant
-les mots reliés au topic avec pour chacun le score associé -->
+les mots reliés au topic avec pour chacun le poids du mot dans le topic -->
 
 <div class="panel panel-default">
 	<div class="panel-heading"><a href="/topics/{{ topic.id }}">Topic {{ topic.id }}</a> 
-		{% if score	%} (Score pour cet article = {{ score|floatformat:-3 }}), {% endif %}
-		(Poids du topic dans le corpus = {{ topic.total_weight }})
+		(Poids du topic dans le corpus = {{ topic.weight_in_corpus }})
 	</div>
 	<table class="table table-bordered table-condensed table-striped">
 		<tr>
 			<th><strong>Mot</strong></th>
-			<th><strong>Score</strong></th>	
+			<th><strong>Poids dans le document</strong></th>	
 		</tr>
 		{% for word in topic.get_related_words  %}
 		<tr>
 			<td>{{ word.word }}</td>
-			<td>{{ word.topic_score|floatformat:-3}}</td>
+			<td>{{ word.weight_in_topic|floatformat:-3}}</td>
 		</tr>
 		{% endfor %}
 	</table>

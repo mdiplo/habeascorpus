@@ -12,7 +12,7 @@
 <div>
     {% for document_topic in document_topics %}
     	<div class="col-md-4">
-		{% include "topic_related_words.html" with topic=document_topic.topic score=document_topic.score %}
+		{% include "topic_related_words.html" with topic=document_topic.topic %}
 		</div>
     {% endfor %}
 </div>

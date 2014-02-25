@@ -26,7 +26,8 @@ class Document(topic.Base):
     auteur = Column(String)
     mots = Column(String)
     date = Column(Date)
-    topics = relationship("DocumentTopic", order_by="-DocumentTopic.score", backref="documents")
+    topics = relationship("DocumentTopic", order_by="-DocumentTopic.weight_in_document",
+                           backref="documents")
     
     def __init__(self, l):
         self.id = int(l[0])
@@ -52,6 +53,6 @@ class DocumentTopic(topic.Base):
     
     document_id = Column(Integer, ForeignKey('documents.id'), primary_key=True)
     topic_id = Column(Integer, ForeignKey('topics.id'), primary_key=True)
-    score = Column(Float) #valeur de topic_id pour le document document_id
+    weight_in_document = Column(Float) #poids du topic dans le document
     topic = relationship("Topic")
     

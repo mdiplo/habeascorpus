@@ -90,7 +90,7 @@ class Controller():
         
         self.send_headers()
         template = loader.get_template('voir_topics.html')
-        words = [{'id_topic' : topic.id, 'weight' : topic.total_weight*word['topic_score'],
+        words = [{'id_topic' : topic.id, 'weight' : topic.weight_in_corpus*word['weight_in_topic'],
                    'word' : word['word']} for topic in topics 
                  for word in topic.get_related_words(3)]
         context = Context({'words' : words})
@@ -121,11 +121,11 @@ class Controller():
                                 join(Document.topics).\
                                 join(DocumentTopic.topic).\
                                 filter(Topic.id == args['id']).\
-                                order_by(desc(DocumentTopic.score)).\
+                                order_by(desc(DocumentTopic.weight_in_document)).\
                                 limit(10).\
                                 all()     
                                 
-        topic_history = session.query(func.sum(DocumentTopic.score), 
+        topic_history = session.query(func.sum(DocumentTopic.weight_in_document), 
                                       extract('year', Document.date).label('year')).\
                                 join(Document).\
                                 join(Topic).\
@@ -133,8 +133,8 @@ class Controller():
                                 group_by("year").\
                                 all()        
         
-        topic_history = [{'value' : score, 'date': year}
-                          for score, year in topic_history]       
+        topic_history = [{'value' : weight_in_corpus, 'date': year}
+                          for weight_in_corpus, year in topic_history]       
         print topic_history
         self.send_headers()
         template = loader.get_template('details_topic.html')
