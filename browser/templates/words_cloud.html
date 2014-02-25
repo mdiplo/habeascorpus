@@ -13,12 +13,15 @@ svg {
 a:link { 
     text-decoration: none;
 }
+
 </style>
 {% endblock %}
 
 {% block body %}
 <div class="page-header">
 	<h1>Mots importants du corpus {{ corpus.name }}</h1>
+</div>
+	
 </div>
 
 <div id="words_viz"></div>
@@ -36,7 +39,8 @@ a:link {
     
     var fill = d3.scale.category20();
     
-    var words = {{ words|safe}};
+    var words = {{ words|safe}},
+    nb_words = words.length;
 
     var min_weight = d3.min(words, function (d) { return d.weight; }),
         max_weight = d3.max(words, function (d) { return d.weight; });
@@ -54,6 +58,7 @@ a:link {
     .words( words.map(function(d) {
         return {id_topic: d.id_topic, text: d.word, size: size(d.weight)};
       }))
+    //.on("word", progress)
     .on("end", draw)
     .start();
     
@@ -62,24 +67,55 @@ a:link {
                 .attr("height", height + margin.top + margin.bottom)
             .append("g")
                 .attr("transform", "translate(" + (width+margin.left+margin.right)/2 +', ' + (height+margin.top+margin.bottom)/2 + ")");
-
+    
+    /*
+    var load_progress = 0;
+    var progress_bar = d3.select(".page-header")
+        .append('div')
+        .attr('class', 'progress')
+    .append('div')
+        .attr('class', 'progress-bar')
+        .attr('role', 'progressbar')
+        .attr('aria-valuenow', "0")
+        .attr('aria-valuemin', "0")
+        .attr('aria-valuemax', "100")
+        .style('width', '0%');
+    */                   
+    function progress(d) { 
+        //Met à jour la barre de chargement
+        load_progress++;
+        progress_bar.transition()
+                    .attr('aria-valuenow', load_progress)
+                    .style('width', 100*load_progress/nb_words + '%');
+    }
     function draw(words) {
+    
+        //On supprime la barre de chargement
+        d3.select('.progress')
+            .transition()
+            .delay(1000)
+            .remove();
 	   
-          svg.selectAll("text")
-            .data(words)
-          .enter().append("a")
-            .attr("xlink:href", function (d) { return "/topics/" + d.id_topic; })
-            .append("text")
-            .style("font-size", function(d) { return d.size + "px"; })
-            .style("font-family", "Impact")
-            .style("fill", function(d) { return fill(d.id_topic); })
-            .attr("text-anchor", "middle")
-            .attr("transform", function(d) {
-              return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-            })
-            .text(function(d) { return d.text; })
-            .on('mouseover', over)
-            .on('mouseout', out);
+        var text = svg.selectAll("text")
+        .data(words)
+      .enter().append("a")
+        .attr("xlink:href", function (d) { return "/topics/" + d.id_topic; })
+        .append("text")
+        .style("font-size", function(d) { return d.size + "px"; })
+        .style("font-family", "Impact")
+        .style("fill", function(d) { return fill(d.id_topic); })
+        .attr("text-anchor", "middle")
+        .attr("transform", function(d) {
+          return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+        })
+        .text(function(d) { return d.text; })
+        .on('mouseover', over)
+        .on('mouseout', out);
+        
+        text.style('opacity', 0)
+            .transition()
+            .duration(1000)
+            .style('opacity', 1);
     }
     
     function over(d) { 
