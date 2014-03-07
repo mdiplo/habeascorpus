@@ -13,6 +13,7 @@ import logging
 import os
 import argparse
 import re
+import glob
     
 import utils
 from gensim import corpora, models
@@ -23,12 +24,6 @@ parser.add_argument('nb_topics', type=int,
 parser.add_argument('--nb_passes', type=int, default=3,
                     help="""Le nombre de passes effectuées par l'algorithme. 
                     Par défaut : 3""")
-parser.add_argument('corpus_path', type=str,
-                    help= """Le fichier bow.mm représentant le corpus sous forme bag-of-words.
-                    Ce fichier est généré par le script corpus_to_matrix.py""")
-parser.add_argument('dictionary_path', type=str,
-                    help="""Le fichier wordids.txt indiquant un id pour chaque mot du
-                    corpus. Ce fichier est généré par le script corpus_to_matrix.py""")
 parser.add_argument('-v', '--verbose', action='store_true',
                     help="Afficher les messages d'information")
 args = parser.parse_args()
@@ -36,22 +31,28 @@ args = parser.parse_args()
 if args.verbose:
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-corpus_name = re.split(r'_bow', utils.split_path(args.corpus_path)['name'])[0]
+mm_corpus = glob.glob('*_bow.mm')
+dictionary = glob.glob('*_wordids.txt')
 
-if os.path.isfile(corpus_name + '_lda.mm'):
+if not mm_corpus:
+    raise IOError("""Impossible de trouver le fichier _bow.mm
+        dans le dossier %s""" % (os.getcwd()))
+if not dictionary:
+    raise IOError("""Impossible de trouver le fichier _wordids.txt
+            dans le dossier %s""" % (os.getcwd()))
+
+if glob.glob('*_lda.mm'):
     raise IOError("Le corpus LDA existe déjà sous forme matricielle")
 
 try:
-    corpus = corpora.mmcorpus.MmCorpus(args.corpus_path)
+    corpus = corpora.mmcorpus.MmCorpus(mm_corpus[0])
 except Exception:
-    raise IOError("""Impossible d'ouvrir le corpus. 
-    Vérifiez que le fichier %s existe bien""" % (args.corpus_path))
+    raise IOError("""Le fichier _bow.mm a été trouvé, mais impossible de l'ouvrir""")
 
 try:    
-    id2word = corpora.dictionary.Dictionary.load_from_text(args.dictionary_path)
+    id2word = corpora.dictionary.Dictionary.load_from_text(dictionary[0])
 except Exception:
-    raise IOError("""Impossible d'ouvrir le dictionnaire.
-    Vérifiez que le fichier %s existe bien""" % (args.dictionary_path))
+    raise IOError("""Le fichier _wordids.txt a été trouvé, mais impossible de l'ouvrir""")
 
 lda = models.ldamodel.LdaModel(corpus=corpus,id2word=id2word,
                                        num_topics=args.nb_topics, passes=args.nb_passes) 
