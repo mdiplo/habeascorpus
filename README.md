@@ -28,7 +28,7 @@ On obtient ainsi dans le dossier `data` le fichier `corpus_wordids.txt` qui asso
 On peut ensuite appliquer l'algorithme LDA qui détermine les topics du corpus (ici on demande 100 topics):
 
 ```
-python $habeascorpus/lda.py 100 corpus_bow.mm corpus_wordids.txt -v
+python $habeascorpus/lda.py 100 -v
 ```
 
 Cette commande produit le fichier `corpus_lda.mm`, qui indique pour chaque document les topics qui lui sont reliés. Elle produit également le fichier `corpus_topics.txt`, qui liste les topics du corpus.
@@ -47,6 +47,13 @@ python $habeascorpus/browser/generate_database.py
 python $habeascorpus/browser/server.py
 ```
 
-Puis on charge la page `localhost:9000/topics` dans un navigateur web.
+Puis on charge la page `localhost:9000/cloud` dans un navigateur web.
+
+### Routes accessibles :
+- /cloud : un nuage des mots importants dans le corpus
+- /topics : la liste des topics
+- /topics/id : les détails sur le topic id
+- /articles/id : les détails sur l'article id
+
 
 
