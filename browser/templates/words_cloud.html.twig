@@ -1,5 +1,5 @@
 <!-- Affiche tous les topics du corpus -->
-{% extends "layout.html" %}
+{% extends "layout.html.twig" %}
 
 {% block stylesheets %}
 <link rel="stylesheet" href="../css/charts.css">
@@ -17,20 +17,17 @@ a:link {
 </style>
 {% endblock %}
 
-{% block body %}
-<div class="page-header">
-	<h1>Mots importants du corpus {{ corpus.name }}</h1>
-</div>
-	
-</div>
+{% block pagebody %}
+
+<h1 class="ui center aligned header">Mots importants du corpus {{ corpus.name }}</h1>
 
 <div id="words_viz"></div>
 
 {% endblock %}
 
 {% block scripts %}
-<script src="../js/pie_chart.js"></script>
-<script src="../lib/d3/d3.layout.cloud.js"></script>
+<script src="../javascript/pie_chart.js"></script>
+<script src="../javascript/d3.layout.cloud.js"></script>
 <script>
 
     var margin = {top: 10, right: 10, bottom: 10, left: 10},
@@ -132,4 +129,5 @@ a:link {
 
 
 {% endblock %}
+    
     

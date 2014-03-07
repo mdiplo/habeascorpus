@@ -1,8 +1,8 @@
 function lineChart(data) {
     
     var margin = {top: 20, right: 20, bottom: 30, left: 50},
-    width = 760,
-    height = 400
+    width = 720,
+    height = 300
     
     var parseDate = d3.time.format("%Y").parse;
     

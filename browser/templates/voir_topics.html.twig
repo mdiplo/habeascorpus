@@ -1,0 +1,36 @@
+<!-- Affiche tous les topics du corpus -->
+{% extends "layout.html.twig" %}
+
+{% block pagebody %}
+<h1 class="ui center aligned header">Topics du corpus {{ corpus.name }}</h1>
+
+<div class="ui four column grid">
+
+{% for topic in topics %}
+    <!--topic-->
+    <div class="column">
+        <h3 class="ui red inverted top attached segment">Topic {{topic.id}}</h3>
+        <div class="ui attached segment">
+        {% for word in topic.get_related_words  %}
+            {{ word.word }}
+        {% endfor %}
+        </div>
+        <h3 class="ui bottom attached segment">
+            <a class="ui basic button" href="/topics/{{ topic.id }}">
+                <i class="chart basic icon"></i>
+                    Détails du topic
+            </a>
+        </h3>
+    </div>
+{% endfor %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src='../javascript/line_chart.js'></script>
+<script>
+    var chart = lineChart({{ topic_history|safe }});
+    d3.select("#history_graph").call(chart);
+</script>
+{% endblock %}

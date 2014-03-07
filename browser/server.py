@@ -76,7 +76,7 @@ class Controller():
     #Est-ce gênant/nécessaire ?
     def words_cloud(self, args): 
         """
-        Charge la page words_cloud.html qui affiche un nuage contenant les mots
+        Charge la page words_cloud.html.twig qui affiche un nuage contenant les mots
         représentatifs des topics du corpus.
         
         """
@@ -90,7 +90,7 @@ class Controller():
             raise IOError('Impossible de se connecter à la base de données')
         
         self.send_headers()
-        template = loader.get_template('words_cloud.html')
+        template = loader.get_template('words_cloud.html.twig')
         words = [{'id_topic' : topic.id, 'weight' : topic.weight_in_corpus*word['weight_in_topic'],
                    'word' : word['word']} for topic in topics 
                  for word in topic.get_related_words(3)]
@@ -100,7 +100,7 @@ class Controller():
         
     def voir_topics(self, args): 
         """
-        Charge la page voir_topics.html qui affiche la liste des topics du corpus
+        Charge la page voir_topics.html.twig qui affiche la liste des topics du corpus
         
         """
 
@@ -113,14 +113,14 @@ class Controller():
             raise IOError('Impossible de se connecter à la base de données')
         
         self.send_headers()
-        template = loader.get_template('voir_topics.html')
+        template = loader.get_template('voir_topics.html.twig')
         context = Context({'topics' : topics})
         self.__server.wfile.write(template.render(context).encode('utf-8'))
         #Merci python 2 qui sait pas gérer unicode
         
     def details_topic(self, args):
         """
-        Charge la page details_topic.html qui affiche les détails d'un topic donné
+        Charge la page details_topic.html.twig qui affiche les détails d'un topic donné
         
         :Parameters:
             -`args['id']` : l'id du topic dont on veut les détails
@@ -156,9 +156,8 @@ class Controller():
         
         topic_history = [{'value' : weight_in_corpus, 'date': year}
                           for weight_in_corpus, year in topic_history]       
-        print topic_history
         self.send_headers()
-        template = loader.get_template('details_topic.html')
+        template = loader.get_template('details_topic.html.twig')
         context = Context({'topic': topic,
                            'related_documents' : related_documents,
                            'topic_history' : json.dumps(topic_history)}
@@ -178,7 +177,7 @@ class Controller():
             raise IOError('Impossible de se connecter à la base de données')
         
         self.send_headers()
-        template = loader.get_template('voir_article.html')
+        template = loader.get_template('voir_article.html.twig')
         context = Context({'document' : document, 'document_topics' : document_topics})
         self.__server.wfile.write(template.render(context).encode('utf-8'))
         #Merci python 2 qui sait pas gérer unicode
@@ -219,6 +218,31 @@ class HabeasCorpusRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'text/css')
                 self.end_headers()
                 self.wfile.write(css_file.read())
+
+        elif self.path.endswith('.eot'):
+            eot_file = self.path.lstrip('/')
+            with open(os.path.join(browser_dir, eot_file)) as eot_file:
+                self.send_response(200)
+                self.send_header('Content-type', 'application/vnd.ms-fontobject')
+                self.end_headers()
+                self.wfile.write(eot_file.read())
+
+        elif self.path.endswith('.svg'):
+            svg_file = self.path.lstrip('/')
+            with open(os.path.join(browser_dir, svg_file)) as svg_file:
+                self.send_response(200)
+                self.send_header('Content-type', 'image/svg+xml')
+                self.end_headers()
+                self.wfile.write(svg_file.read())
+
+        elif self.path.endswith('.woff'):
+            woff_file = self.path.lstrip('/')
+            with open(os.path.join(browser_dir, woff_file)) as woff_file:
+                self.send_response(200)
+                self.send_header('Content-type', 'application/font-woff')
+                self.end_headers()
+                self.wfile.write(woff_file.read())
+
             
         else:
             self.__router.route(self.path) 

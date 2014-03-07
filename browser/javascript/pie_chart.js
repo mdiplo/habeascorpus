@@ -58,8 +58,5 @@ function pieChart() {
         return chart;
     };
     
-    chart.value = function(f)
-        pie.value(f);
-    
     return chart;
 }
