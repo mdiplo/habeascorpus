@@ -46,7 +46,7 @@ a:link {
         max_weight = d3.max(words, function (d) { return d.weight; });
     
     var size = d3.scale.linear()
-        .range([10, width/2])
+        .range([10, width/8])
         .domain([min_weight, max_weight]);
         
     d3.layout.cloud()
