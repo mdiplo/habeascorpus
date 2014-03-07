@@ -256,4 +256,7 @@ if __name__ == '__main__':
     
     adress = ('', 9000)
     httpd = BaseHTTPServer.HTTPServer(adress, HabeasCorpusRequestHandler)
+
+    print "Ouvrir la page http://localhost:9000/cloud dans un navigateur"
+    
     httpd.serve_forever()
