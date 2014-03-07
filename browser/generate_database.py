@@ -87,7 +87,10 @@ def add_documents(raw_corpus_file, lda_corpus_file, topics, session):
                 doc_topic.topic = topics[id_topic]
                 doc.topics.append(doc_topic)
             session.add(doc)
-            
+
+            if docno % 500 == 0:
+                session.commit()
+
         session.commit()
         
 if __name__ == '__main__':
