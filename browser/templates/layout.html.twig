@@ -20,7 +20,8 @@
 					</a>
 				</div>
 				<div class="right menu">
-					<a class="popup icon github item" data-content="Voir le projet sur github" href="https://github.com/Fil/habeascorpus">
+					<a class="popup icon github item" data-content="Voir le projet sur github"
+						 href="https://github.com/Fil/habeascorpus">
 						<i class="icon github"></i> 
 					</a>
 				</div>
@@ -41,8 +42,13 @@
 			<p>Euh... ?</p>
 		</footer>
 		<script src="../javascript/d3.min.js"></script>
-		<script src="../javascript/jquery.min.js"></script>
+		<script src="../javascript/jquery-1.11.0.min.js"></script>
 		<script src="../javascript/semantic.min.js"></script>
+		<script>
+			$(function() {
+					$('.popup').popup();
+			});
+		</script>
 		{% block scripts %}
 		{% endblock %}
 	</body>

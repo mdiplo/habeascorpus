@@ -8,7 +8,9 @@ function lineChart(data) {
     
     data.forEach(function(d) {
         d.date = parseDate(String(d.date));
-      });   
+        d.year = d.date.getFullYear();
+      });  
+
     
     var x = d3.time.scale()
         .range([0, width]);
@@ -25,7 +27,7 @@ function lineChart(data) {
         .orient("left");
     
     var line = d3.svg.line()
-        .interpolate("basis")
+        .interpolate("cardinal")
         .x(function(d) { return x(d.date); })
         .y(function(d) { return y(d.value); });
     
@@ -55,6 +57,17 @@ function lineChart(data) {
             .datum(data)
             .attr("class", "line")
             .attr("d", line);
+
+            svg.append("g")
+                .selectAll('circle')
+                .data(data)
+               .enter()
+                .append('circle')
+                .attr('cx', function (d) { return x(d.date); })
+                .attr('cy', function (d) { return y(d.value); })
+                .attr('r', 4)
+                .attr('class', 'curvepoints')
+
         });
     }
     

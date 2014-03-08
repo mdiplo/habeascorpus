@@ -16,7 +16,7 @@
         {% endfor %}
         </div>
         <h3 class="ui bottom attached segment">
-            <a class="ui basic button" href="/topics/{{ topic.id }}">
+            <a class="ui basic button " href="/topics/{{ topic.id }}">
                 <i class="chart basic icon"></i>
                     Détails du topic
             </a>
@@ -30,7 +30,5 @@
 {% block scripts %}
 <script src='../javascript/line_chart.js'></script>
 <script>
-    var chart = lineChart({{ topic_history|safe }});
-    d3.select("#history_graph").call(chart);
 </script>
 {% endblock %}

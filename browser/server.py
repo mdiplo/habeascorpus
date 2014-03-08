@@ -9,6 +9,7 @@ import os.path
 import glob
 import sys
 import json
+import urllib
 from django.template import Context
 from django.template import loader
 from django.conf import settings
@@ -181,16 +182,40 @@ class Controller():
         context = Context({'document' : document, 'document_topics' : document_topics})
         self.__server.wfile.write(template.render(context).encode('utf-8'))
         #Merci python 2 qui sait pas gérer unicode
+    
+    def curvepoints_tooltip(self, args):
+        try:
+            engine = create_engine('sqlite:///' + self.__database_path, echo=True)
+            Session = sessionmaker(bind=engine)
+            session = Session()
+            documents = session.query(Document).\
+                             join(DocumentTopic).\
+                             join(Topic).\
+                             filter(Topic.id == args['id']).\
+                             filter(extract('year', Document.date) == int(args['year'])).\
+                             order_by(desc(DocumentTopic.weight_in_document)).\
+                             limit(3).\
+                             all()
+                                 
+        except:
+            raise IOError('Impossible de se connecter à la base de données')
+        
+        self.send_headers()
+        template = loader.get_template('curvepoints_tooltip.html.twig')
+        context = Context({'documents' : documents})
+        self.__server.wfile.write(template.render(context).encode('utf-8'))
         
 class HabeasCorpusRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     
     def __init__(self, request, client_adress, server):
             
         routes = [
-                  {'regexp' : r'/topics/(?P<id>\d*)', 'action' : 'details_topic'},
-                  {'regexp' : r'/topics$', 'action' : 'voir_topics'},
-                  {'regexp' : r'/cloud', 'action' : 'words_cloud'},
-                  {'regexp' : r'/articles/(?P<id>\d*)', 'action' : 'voir_article'}
+                  {'regexp' : r'/topics/(?P<id>\d*)', 'action': 'details_topic'},
+                  {'regexp' : r'/topics$', 'action': 'voir_topics'},
+                  {'regexp' : r'/cloud', 'action': 'words_cloud'},
+                  {'regexp' : r'/articles/(?P<id>\d*)', 'action': 'voir_article'},
+                  {'regexp' : r'/gerardmajax/curvepointstooltip\?id=(?P<id>\d*)&year=(?P<year>.*)', 
+                        'action': 'curvepoints_tooltip'}
                   ]
         
         self.__router = Router(self, Controller(self))
@@ -243,6 +268,14 @@ class HabeasCorpusRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(woff_file.read())
 
+        elif self.path.endswith('.png'):
+            png_file = self.path.lstrip('/')
+            with open(os.path.join(browser_dir, png_file)) as png_file:
+                self.send_response(200)
+                self.send_header('Content-type', 'image/png')
+                self.end_headers()
+                self.wfile.write(png_file.read())
+
             
         else:
             self.__router.route(self.path) 
@@ -258,5 +291,5 @@ if __name__ == '__main__':
     httpd = BaseHTTPServer.HTTPServer(adress, HabeasCorpusRequestHandler)
 
     print "Ouvrir la page http://localhost:9000/cloud dans un navigateur"
-    
+
     httpd.serve_forever()
