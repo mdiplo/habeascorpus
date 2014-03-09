@@ -49,11 +49,11 @@
                     year: d3.select(this).datum().date.getFullYear()
                 },
                 function(data) {
-                    point.attr('data-html', data);
+                    point
+                    .attr('data-html', data)
+                    .popup('show');
                 }
             );
-
-            $(this).popup('show');
         });
     });
 </script>
