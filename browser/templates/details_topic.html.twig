@@ -42,7 +42,7 @@
     d3.select("#history_graph").call(chart);
 
     $(function() {
-        $('.curvepoints').hover(function() {
+        $('.curvepoints').mouseenter(function() {
             var point = $(this);
             $.get('/gerardmajax/curvepointstooltip', {
                     id: {{ topic.id }},
@@ -50,9 +50,11 @@
                 },
                 function(data) {
                     point.attr('data-html', data);
-                });
+                }
+            );
+
+            $(this).popup('show');
         });
-        $('.curvepoints').popup();
     });
 </script>
 {% endblock %}

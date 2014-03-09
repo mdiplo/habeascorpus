@@ -29,3 +29,7 @@
   stroke: white;
   stroke-width: 2px;
 }
+
+.curvepoints:hover {
+  stroke: black;
+}
