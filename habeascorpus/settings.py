@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Django settings for habeascorpus project.
 
@@ -16,7 +18,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# SECURITY WARNING: keep the sdatabase directoryecret key used in production secret!
 SECRET_KEY = '$7zi5j4_+^mx(r2zoi*5+$m(#jx$x@nr+9$vltvwb*%6$h$(2k'
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -32,16 +34,19 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'browser',
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',    
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',   
 )
+
+REST_FRAMEWORK = {
+    'PAGINATE_BY': 10
+}
 
 ROOT_URLCONF = 'habeascorpus.urls'
 
@@ -54,7 +59,7 @@ WSGI_APPLICATION = 'habeascorpus.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'test.db'),
     }
 }
 
