@@ -1,0 +1,18 @@
+body {
+    margin: 0px;
+    font-family: "helvetica";
+}    
+
+nav {
+    top: 0px;
+}
+
+nav>div {
+    width: auto;
+    margin-left: 350px;
+    margin-right: 200px;
+}
+
+#pagebody {
+    margin: 100px 50px 0px 50px;
+}
