@@ -1,16 +1,19 @@
 'use strict';
 
+var habeascorpusApp = angular.module('habeascorpusApp', [
+    'ngRoute',
+    'habeascorpusControllers'
+]);
 
-// Declare app level module which depends on filters, and services
-angular.module('myApp', [
-  'ngRoute',
-  'myApp.filters',
-  'myApp.services',
-  'myApp.directives',
-  'myApp.controllers'
-]).
-config(['$routeProvider', function($routeProvider) {
-  $routeProvider.when('/view1', {templateUrl: 'partials/partial1.html', controller: 'MyCtrl1'});
-  $routeProvider.when('/view2', {templateUrl: 'partials/partial2.html', controller: 'MyCtrl2'});
-  $routeProvider.otherwise({redirectTo: '/view1'});
-}]);
+habeascorpusApp.config(['$routeProvider',
+    function($routeProvider) {
+        $routeProvider.
+            when('/topics', {
+                templateUrl: 'partials/topic-list.html',
+                controller: 'TopicListController'
+            }).
+            when('/topics/:topicId', {
+                templateUrl: 'partials/topic-details.html',
+                controller: 'TopicDetailsController'
+            });
+    }]);

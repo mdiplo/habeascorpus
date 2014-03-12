@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, url
-from browser import views
+from api import views
 
 urlpatterns = patterns('',
     url(r'^topics/$', views.TopicList.as_view()),

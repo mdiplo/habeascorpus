@@ -1,11 +1,16 @@
 'use strict';
 
-/* Controllers */
+var habeascorpusControllers = angular.module('habeascorpusControllers', []);
 
-angular.module('myApp.controllers', []).
-  controller('MyCtrl1', [function() {
+habeascorpusControllers.controller('TopicListController', ['$scope', '$http',
+    function ($scope, $http) {
+        $http.get('/api/topics/?format=json').success(function(data) {
+            $scope.topics = data;
+            console.log(data);
+        }); 
+    }]);
 
-  }])
-  .controller('MyCtrl2', [function() {
-
-  }]);
+habeascorpusControllers.controller('TopicDetailsController', ['$scope', '$routeParams',
+    function($scope, $routeParams) {
+        $scope.topicId = $routeParams.topicId;
+    }]);

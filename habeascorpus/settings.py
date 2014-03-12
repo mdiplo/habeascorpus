@@ -28,6 +28,12 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+STATIC_URL = '/static/'
+
+# La racine de l'application qui consomme l'API
+STATICFILES_DIRS = (
+    os.path.join(os.path.join(BASE_DIR, 'browser'), 'app/'),
+)
 
 # Application definition
 
@@ -35,7 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
     'rest_framework',
-    'browser',
+    'api',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -43,10 +49,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',    
     'django.middleware.clickjacking.XFrameOptionsMiddleware',   
 )
-
-REST_FRAMEWORK = {
-    'PAGINATE_BY': 10
-}
 
 ROOT_URLCONF = 'habeascorpus.urls'
 
@@ -59,7 +61,7 @@ WSGI_APPLICATION = 'habeascorpus.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'test.db'),
+        'NAME': os.path.join(os.path.join(BASE_DIR, 'data'), 'test.db'),
     }
 }
 
@@ -76,8 +78,3 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.6/howto/static-files/
-
-STATIC_URL = '/static/'

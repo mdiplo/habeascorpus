@@ -1,0 +1,17 @@
+<h1 class="ui center aligned header">Topics du corpus</h1>
+
+<div class="ui four column grid">
+
+    <div class="column" ng-repeat="topic in topics">
+        <h3 class="ui red inverted top attached segment">Topic {{topic.id}}</h3>
+        <ul class="ui attached segment">
+            <li ng-repeat="word in topic.related_words ">{{ word.word }}</li>
+        </ul>
+        <h3 class="ui bottom attached segment">
+            <a class="ui basic button " href="/topics/{{ topic.id }}">
+                <i class="chart basic icon"></i>
+                    Détails du topic
+            </a>
+        </h3>
+    </div>
+</div>
