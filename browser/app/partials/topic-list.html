@@ -1,6 +1,6 @@
 <h1 class="ui center aligned header">Topics du corpus</h1>
 
-<div class="ui four column grid">
+<div class="ui four column grid" ng-controller="TopicListController">
 
     <div class="column" ng-repeat="topic in topics">
         <h3 class="ui red inverted top attached segment">Topic {{topic.id}}</h3>

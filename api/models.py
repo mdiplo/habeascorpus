@@ -21,9 +21,17 @@ class Topic(models.Model):
         return [{'word' : word, 'weight_in_topic' : weight_in_topic} 
                 for (weight_in_topic, word) in words_tuples]
 
+    def history(self):
+        """
+        Renvoie l'historique du topic sous la forme d'une liste d'entrées
+        {year: ..., word_in_corpus: ...}
+        
+        """
+
 
     class Meta:
         db_table = 'topics'
+
 
 class Document(models.Model):
     """
@@ -37,7 +45,7 @@ class Document(models.Model):
     auteur = models.CharField(max_length=30)
     mots = models.CharField(max_length=100)
     date = models.DateField()
-    topics = models.ManyToManyField(Topic, through='DocumentTopic')
+    topics = models.ManyToManyField(Topic, through='DocumentTopic', related_name='documents')
 
     class Meta:
         db_table = 'documents'

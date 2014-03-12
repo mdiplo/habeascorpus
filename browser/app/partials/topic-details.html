@@ -1,0 +1,38 @@
+<div class="ui grid" ng-controller="TopicDetailsController">
+    <div class="row">
+        <div class="four wide column">
+            <table class="ui table segment">
+                <thead>
+                    <tr>
+                        <th><strong>Mot</strong></th>
+                        <th><strong>Poids dans le document</strong></th>    
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="word in topic.related_words">
+                        <td>{{ word.word }}</td>
+                        <td>{{ word.weight_in_topic }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="twelve wide column">
+            <h3 class="ui blue inverted top attached segment">Évolution du topic dans le temps</h3>
+            <div class="ui attached segment"></div>
+        </div>
+    </div>
+</div>
+
+<h2 class="ui header">Documents en lien avec le topic</h2>
+<div class="ui red segment">
+    <div class="ui selection list">
+        {% for document in related_documents %}
+        <div class="item">
+            <h4 class="ui header" href="/articles/{{ document.id }}">{{ document.titre }}
+                <h5 class="sub header">Par {{ document.auteur }}, {{ document.date|date:'m-Y'}}</h5>
+            </h4>
+        </div>
+        {% endfor %}
+    </div>
+</div>

@@ -1,7 +1,11 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
 from api import views
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'topics', views.TopicViewSet)
+router.register(r'documents', views.DocumentViewSet)
 
 urlpatterns = patterns('',
-    url(r'^topics/$', views.TopicList.as_view()),
-    url(r'^documents/$', views.DocumentList.as_view()),
+    url(r'^', include(router.urls)),
 )

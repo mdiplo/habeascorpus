@@ -4,7 +4,6 @@ from api.models import Document, Topic, DocumentTopic
 
 class TopicSerializer(serializers.ModelSerializer):
     related_words = serializers.Field(source='get_related_words')
-
     
     class Meta:
         model = Topic

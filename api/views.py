@@ -1,11 +1,12 @@
 from api.models import Topic, Document
 from api.serializers import TopicSerializer, DocumentSerializer
-from rest_framework import generics
+from rest_framework import viewsets
 
-class TopicList(generics.ListAPIView):
+class TopicViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Topic.objects.all()
     serializer_class = TopicSerializer
 
-class DocumentList(generics.ListAPIView):
+class DocumentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
+    paginate_by = 10
