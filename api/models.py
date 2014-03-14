@@ -21,13 +21,6 @@ class Topic(models.Model):
         return [{'word' : word, 'weight_in_topic' : weight_in_topic} 
                 for (weight_in_topic, word) in words_tuples]
 
-    def history(self):
-        """
-        Renvoie l'historique du topic sous la forme d'une liste d'entrées
-        {year: ..., word_in_corpus: ...}
-        
-        """
-
 
     class Meta:
         db_table = 'topics'

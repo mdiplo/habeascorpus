@@ -8,4 +8,5 @@ router.register(r'documents', views.DocumentViewSet)
 
 urlpatterns = patterns('',
     url(r'^', include(router.urls)),
+    url(r'^topics/(?P<pk>[0-9]+)/related_documents$', views.TopicRelatedDocuments.as_view()),
 )
