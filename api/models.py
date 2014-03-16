@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import json
+from datetime import datetime
 from django.db import models
+
 
 class Topic(models.Model):
     """
@@ -8,6 +11,9 @@ class Topic(models.Model):
 
     related_words = models.TextField()
     weight_in_corpus = models.FloatField()
+
+    class Meta:
+        db_table = 'topics'
 
     def get_related_words(self):
         """
@@ -18,12 +24,25 @@ class Topic(models.Model):
         
         words_tuples = map(eval, self.related_words.split('\t'))
         words_tuples = sorted(words_tuples, reverse=True)
-        return [{'word' : word, 'weight_in_topic' : weight_in_topic} 
+        return [{'word': word, 'weight_in_topic': weight_in_topic}
                 for (weight_in_topic, word) in words_tuples]
 
+    def get_history(self):
+        """
+        Renvoie l'historique d'un Topic : pour chaque année, le poids du topic dans
+        le corpus et les 3 articles les  plus représentatifs du Topic à cette date.
 
-    class Meta:
-        db_table = 'topics'
+        """
+
+        history = DocumentTopic.objects.filter(topic__id=2)
+                            #order_by('date').\
+                            #annotate(models.Sum(topics__documenttopic__weight_in_document))
+
+                            #order_by('topic__date')
+                            #aggregate(models.Sum('weight_in_document')) 
+
+        print history
+
 
 
 class Document(models.Model):
@@ -43,6 +62,22 @@ class Document(models.Model):
     class Meta:
         db_table = 'documents'
 
+    def __init__(self, l):
+        super(Document, self).__init__()
+        self.id = int(l[0])
+        self.titre = l[1].decode('utf-8')
+        self.chapo = l[2].decode('utf-8')
+        self.texte = l[3].decode('utf-8')
+        self.langue = l[4].decode('utf-8')
+        self.auteur = l[5].decode('utf-8')
+        self.mots = l[6].decode('utf-8')
+        try:
+            self.date = datetime.strptime(l[7].decode('utf-8'), '%Y-%m')
+        except ValueError:
+            self.date = datetime(1, 1, 1)
+            #python n'accepte pas la date 0000-00, on la remplace par 0000-01
+
+        
 class DocumentTopic(models.Model):
     """
     Cette classe représente la relation many-to-many entre la classe Document 
@@ -51,7 +86,7 @@ class DocumentTopic(models.Model):
     
     document = models.ForeignKey(Document)
     topic = models.ForeignKey(Topic)
-    weight_in_document = models.FloatField() #poids du topic dans le document
+    weight_in_document = models.FloatField()  # poids du topic dans le document
 
     class Meta:
         db_table = "documents_topics"
