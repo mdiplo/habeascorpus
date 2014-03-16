@@ -34,14 +34,13 @@ class Topic(models.Model):
 
         """
 
-        history = DocumentTopic.objects.filter(topic__id=2)
-                            #order_by('date').\
-                            #annotate(models.Sum(topics__documenttopic__weight_in_document))
+        history = DocumentTopic.objects.filter(topic__id=self.id).\
+                            values('document__date').\
+                            extra(select={'year': "strftime('%Y', date)"}).\
+                            values('year').\
+                            annotate(weight_in_corpus=models.Sum('weight_in_document')) 
 
-                            #order_by('topic__date')
-                            #aggregate(models.Sum('weight_in_document')) 
-
-        print history
+        return history
 
 
 
