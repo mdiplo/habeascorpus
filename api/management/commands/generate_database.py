@@ -95,8 +95,8 @@ def add_documents(raw_corpus_file, lda_corpus_file, topics):
         for docno, raw_line in enumerate(raw):
             #lda[docno] donne les topics associés au document raw_line sous la forme
             #d'une liste de tuples (id_topic, poids du topic id_topic dans le document docno)  
-            print "Document n°" +str(docno)
-            doc = Document(raw_line.rstrip().split('\t'))
+            print "Document n°" + str(docno)
+            doc = Document.objects.create_document(raw_line.rstrip().split('\t'))
             doc.save()
             for id_topic, weight_in_document in lda[docno]:
                 doc_topic = DocumentTopic(document=doc,

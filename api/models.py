@@ -36,9 +36,9 @@ class Topic(models.Model):
 
         history = DocumentTopic.objects.filter(topic__id=self.id).\
                             values('document__date').\
-                            extra(select={'year': "strftime('%Y', date)"}).\
-                            values('year').\
-                            annotate(weight_in_corpus=models.Sum('weight_in_document')) 
+                            extra(select={'key': "strftime('%Y', date)"}).\
+                            values('key').\
+                            annotate(value=models.Sum('weight_in_document')) 
 
         return history
 
@@ -61,7 +61,15 @@ class Document(models.Model):
     class Meta:
         db_table = 'documents'
 
-    def __init__(self, l):
+
+class DocumentManager(models.Manager):
+    def create_document(self, l):
+        """
+        Créé un objet document en fournissant les propriétés du document
+        dans une liste l
+
+        """
+
         super(Document, self).__init__()
         self.id = int(l[0])
         self.titre = l[1].decode('utf-8')
