@@ -1,5 +1,5 @@
 angular.module('d3-angular', [])
-  .directive('lineChart', ['d3Service', function(d3Service) {
+  .directive('lineChart', function() {
       return {
           restrict: 'EA',
           scope: {
@@ -19,16 +19,17 @@ angular.module('d3-angular', [])
 
                   if (!data) return;
 
-                  var width = 720,
-                  height = 300;
+                  var  margin = {'left': 50, 'right': 20, 'top': 10, 'bottom': 20},
+                    width = 800,
+                    height = 300,
+                    xName = 'key',
+                    yName = 'value',
+                    getX = function (d){ return d[xName.toString()]; }
+                    getY = function (d){ return d[yName.toString()]; }
+                  ;
+                 
 
                   var parseDate = d3.time.format("%Y").parse;
-                  
-                  data.forEach(function(d) {
-                      d.date = parseDate(String(d.date));
-                      d.year = d.date.getFullYear();
-                  });  
-
                   
                   var x = d3.time.scale()
                       .range([0, width]);
@@ -46,13 +47,13 @@ angular.module('d3-angular', [])
                   
                   var line = d3.svg.line()
                       .interpolate("cardinal")
-                      .x(function(d) { return x(d.date); })
-                      .y(function(d) { return y(d.value); });
+                      .x(function(d) { return x(getX(d)); })
+                      .y(function(d) { return y(getY(d)); });
                   
-                  x.domain(d3.extent(data, function(d) { return d.date; }));
-                  y.domain(d3.extent(data, function(d) { return d.value; }));
+                  x.domain(d3.extent(data, function(d) { return getX(d); }));
+                  y.domain(d3.extent(data, function(d) { return getY(d); }));
 
-                  svg.attr("width", width + margin.left + margin.right)
+                  svg = svg.attr("width", width + margin.left + margin.right)
                       .attr("height", height + margin.top + margin.bottom)
                     .append("g")
                       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -76,7 +77,7 @@ angular.module('d3-angular', [])
                       .data(data)
                      .enter()
                       .append('circle')
-                      .attr('cx', function (d) { return x(d.date); })
+                      .attr('cx', function (d) { return x(d.key); })
                       .attr('cy', function (d) { return y(d.value); })
                       .attr('r', 4)
                       .attr('class', 'curvepoints')
@@ -84,4 +85,4 @@ angular.module('d3-angular', [])
                     }
             }
         }
-    }]);
+    });

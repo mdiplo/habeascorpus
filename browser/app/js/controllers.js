@@ -13,11 +13,19 @@ angular.module('habeascorpus.controllers')
         function($scope, $routeParams, $http) {
             $scope.topicId = $routeParams.topicId;
             
+            //charge les données générales du topic (id, related_words)
             $http.get('/api/topics/' + $routeParams['topicId'] + '?format=json')
                 .success(function(data) {
                     $scope.topic = data;
                 }); 
-
+            
+            //charge l'historique du topic pour afficher la courbe
+            $http.get('/api/topics/' + $routeParams['topicId'] + '/history?format=json')
+                .success(function(data) {
+                    $scope.topic_history = data;
+                });
+            
+            //charge les documents liés au topic
             $scope.loadDocuments = function(page) {
                 $http.get('/api/topics/' + $routeParams['topicId'] + '/related_documents?page=' + page)
                 .success(function(data) {
