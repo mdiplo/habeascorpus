@@ -4,12 +4,14 @@ angular.module('habeascorpus', [
     'ngRoute',
     'habeascorpus.controllers',
     'habeascorpus.directives',
+    'habeascorpus.filters',
     'ui.bootstrap.pagination',
     'd3-angular'
 ]);
 
 angular.module('habeascorpus.controllers', []);
 angular.module('habeascorpus.directives', []);
+angular.module('habeascorpus.filters', []);
 
 angular.module('habeascorpus')
     .config(['$routeProvider',

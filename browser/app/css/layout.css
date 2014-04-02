@@ -1,6 +1,6 @@
 body {
     margin: 0px;
-    font-family: "helvetica";
+    font-family: "arial";
 }    
 
 nav {
@@ -13,6 +13,84 @@ nav>div {
     margin-right: 200px;
 }
 
+a {
+    text-decoration: none;
+}
+
 #pagebody {
     margin: 100px 50px 0px 50px;
 }
+
+footer {
+    clear: both;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-top: 100px;
+    color: #777;
+    text-align: center;
+    border-top: 1px solid #E5E5E5;
+}
+
+.topic-resume {
+    border: 1px solid black;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+#topics-list>li>ul {
+    margin: 10px;
+    padding: 0px;
+    transition: width 0.4s;
+}
+
+#topics-list li {
+    list-style-type: none;
+}
+
+#topics-list li a {
+    display: block;
+    color: black;
+    margin: 0px;
+    padding: 5px;
+}
+
+#topics-list li a:hover {
+    text-decoration: none;
+}
+
+#topics-list>li>ul>li {
+    display: inline-block;
+    width: 33%;
+    text-align: center;
+}
+
+#topics-list>li>ul li:first-child {
+    background-color: #B1D0FF;
+}
+
+#topics-list>li>ul li:nth-child(2) {
+    background-color: #BC77E8; 
+}
+
+#topics-list>li>ul li:nth-child(3) {
+    background-color: #FF9490; 
+}
+
+#topics-list>li>ul:hover {
+    cursor: pointer;
+    width: 100% !important;
+}
+
+#topics-list>li>ul:hover li:first-child {
+    background-color: #1B9EFF;
+}
+
+#topics-list>li>ul:hover li:nth-child(2) {
+    background-color: #8516E8;
+}
+
+#topics-list>li>ul:hover li:nth-child(3) {
+    background-color: #FF2417;
+}
+
+
