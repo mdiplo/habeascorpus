@@ -6,12 +6,15 @@ Génère la base de données sqlite nécessaire pour explorer le corpus.
 
 import glob
 import os.path
+import datetime
+import json
+from api import utils
 from gensim import corpora
 from django.core import management
 from django.core.management.base import BaseCommand
 from api.models import Topic, Document, DocumentTopic
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Sum, Min, Max
 
 
 class Command(BaseCommand):
@@ -39,7 +42,8 @@ class Command(BaseCommand):
         management.call_command('syncdb')
         topics = add_topics(topics[0])
         add_documents(tsv_corpus[0], lda_corpus[0], topics)
-        calculate_topic_weights(topics)
+        for topic in topics:
+            compute_topic_history(topic)
 
 
 def add_topics(topics_file):
@@ -96,7 +100,7 @@ def add_documents(raw_corpus_file, lda_corpus_file, topics):
             #lda[docno] donne les topics associés au document raw_line sous la forme
             #d'une liste de tuples (id_topic, poids du topic id_topic dans le document docno)  
             print "Document n°" + str(docno)
-            doc = Document.objects.create_document(raw_line.rstrip().split('\t'))
+            doc = Document.create_document(raw_line.rstrip().split('\t'))
             doc.save()
             for id_topic, weight_in_document in lda[docno]:
                 doc_topic = DocumentTopic(document=doc,
@@ -107,19 +111,38 @@ def add_documents(raw_corpus_file, lda_corpus_file, topics):
             if docno % 1000 == 0:
                 transaction.commit()
 
-def calculate_topic_weights(topics):
+
+def compute_topic_history(topic):
     """
-    Calcule pour chaque topic son poids total dans le corpus
+    Calcule l'historique du topic sous la forme d'un dictionnaire
+    {year: weight, ...} où weight est le poids du topic calculé sur tous les
+    articles écrits avant year. Ainsi, on peut retrouver le poids entre 
+    year1 et year2 par soustraction.
 
     """
 
-    transaction.set_autocommit(False)
-    for topic in topics:
-        result = DocumentTopic.objects.\
+    bounds = Document.objects.aggregate(min_date=Min('date'), max_date=Max('date'))
+    firstyear = bounds['min_date']
+    lastyear = bounds['max_date']
+
+    history = []
+    total_weight = 0
+    for year in range(firstyear.year, lastyear.year+1):
+        query = DocumentTopic.objects.filter(document__date__year=year).\
                 filter(topic__id=topic.id).\
-                aggregate(weight_in_corpus=Sum('weight_in_document'))
+                aggregate(weight=Sum('weight_in_document'))
 
-        topic.weight_in_corpus = result['weight_in_corpus']
-        topic.save()
+        if query['weight']:
+            history.append({'date': datetime.date(year, 1, 1), 'weight': query['weight']})
+            total_weight += query['weight']
+        else:
+            history.append({'date': datetime.date(year, 1, 1), 'weight': 0.0})
 
+    topic.history = json.dumps(history, cls=utils.MyJsonEncoder)
+    print topic.history
+    #poids total = poids des articles écrits avant lastyear
+    topic.weight_in_corpus = total_weight
+    topic.save()
     transaction.commit()
+
+    print "Historique topic %d" % (topic.id)

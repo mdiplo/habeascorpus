@@ -9,9 +9,11 @@ from rest_framework.response import Response
 from rest_framework import generics
 from rest_framework import status
 
+
 class TopicViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Topic.objects.all()
     serializer_class = TopicSerializer
+
 
 class TopicRelatedDocuments(generics.ListAPIView):
     """Renvoie les documents liés à un article classés par poids décroissant"""
@@ -43,9 +45,6 @@ def topic_history(request, pk):
 
     return Response(topic.get_history())
      
-
-
-
 
 class DocumentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Document.objects.all()

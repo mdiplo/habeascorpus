@@ -11,6 +11,7 @@ class Topic(models.Model):
 
     related_words = models.TextField()
     weight_in_corpus = models.FloatField()
+    history = models.TextField()
 
     class Meta:
         db_table = 'topics'
@@ -42,8 +43,6 @@ class Topic(models.Model):
 
         return history
 
-
-
 class Document(models.Model):
     """
     Un document du corpus
@@ -55,11 +54,36 @@ class Document(models.Model):
     langue = models.CharField(max_length=2)
     auteur = models.CharField(max_length=30)
     mots = models.CharField(max_length=100)
-    date = models.DateField()
+    date = models.DateField(null=True)
     topics = models.ManyToManyField(Topic, through='DocumentTopic', related_name='documents')
 
     class Meta:
         db_table = 'documents'
+
+    @classmethod
+    def create_document(cls, l):
+        """
+        Créé un objet document en fournissant les propriétés du document
+        dans une liste l
+
+        """
+
+        doc = Document()
+
+        doc.id = int(l[0])
+        doc.titre = l[1].decode('utf-8')
+        doc.chapo = l[2].decode('utf-8')
+        doc.texte = l[3].decode('utf-8')
+        doc.langue = l[4].decode('utf-8')
+        doc.auteur = l[5].decode('utf-8')
+        doc.mots = l[6].decode('utf-8')
+        try:
+            doc.date = datetime.strptime(l[7].decode('utf-8'), '%Y-%m')
+        except ValueError:
+            doc.date = None
+            #python n'accepte pas la date 0000-00
+
+        return doc
 
 
 class DocumentManager(models.Manager):
@@ -81,8 +105,8 @@ class DocumentManager(models.Manager):
         try:
             self.date = datetime.strptime(l[7].decode('utf-8'), '%Y-%m')
         except ValueError:
-            self.date = datetime(1, 1, 1)
-            #python n'accepte pas la date 0000-00, on la remplace par 0000-01
+            self.date = None
+            #python n'accepte pas la date 0000-00
 
         
 class DocumentTopic(models.Model):
