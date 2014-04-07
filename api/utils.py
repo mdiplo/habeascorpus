@@ -17,6 +17,7 @@ class MyJsonEncoder(json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, datetime.date):
-            return obj.strftime('%d-%m-%Y')
+            # On sérialie une date en ne mettant que son année
+            return obj.strftime('Y')
 
         return json.JSONEncoder.default(self, obj)

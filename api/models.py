@@ -1,12 +1,26 @@
 # -*- coding: utf-8 -*-
-import json
 from datetime import datetime
 from django.db import models
+
+"""
+Les différents modèles utilisés pour l'API :
+    - Document : Un document du corpus, typiquement un article
+    - Topic : Une liste de mots (typiquement 10 mots) affectés de poids
+        ex: [{'mot': 'chine', 'poids': 2.3}, {'mot': 'mao', 'poids': 1.9},...]
+
+"""
 
 
 class Topic(models.Model):
     """
     Un topic du corpus.
+
+    Attributs:
+        - related_words : les mots représentatifs du Topic
+        - weight_in_corpus : le poids total du Topic dans le corpus
+        - history : l'historique du Topic, i.e la liste des poids dans le
+            corpus pour chaque année
+
     """
 
     related_words = models.TextField()
@@ -86,38 +100,20 @@ class Document(models.Model):
         return doc
 
 
-class DocumentManager(models.Manager):
-    def create_document(self, l):
-        """
-        Créé un objet document en fournissant les propriétés du document
-        dans une liste l
-
-        """
-
-        super(Document, self).__init__()
-        self.id = int(l[0])
-        self.titre = l[1].decode('utf-8')
-        self.chapo = l[2].decode('utf-8')
-        self.texte = l[3].decode('utf-8')
-        self.langue = l[4].decode('utf-8')
-        self.auteur = l[5].decode('utf-8')
-        self.mots = l[6].decode('utf-8')
-        try:
-            self.date = datetime.strptime(l[7].decode('utf-8'), '%Y-%m')
-        except ValueError:
-            self.date = None
-            #python n'accepte pas la date 0000-00
-
-        
 class DocumentTopic(models.Model):
     """
-    Cette classe représente la relation many-to-many entre la classe Document 
-    et la classe Topic. 
-    """ 
-    
+    Cette classe représente la relation many-to-many entre la classe Document
+    et la classe Topic.
+
+    Attributs:
+        - document : Un Document du corpus
+        - topic : Un Topic du corpus
+        - weight_in_dcument : Le poids du Topic dans le Document
+    """
+
     document = models.ForeignKey(Document)
     topic = models.ForeignKey(Topic)
-    weight_in_document = models.FloatField()  # poids du topic dans le document
+    weight_in_document = models.FloatField()
 
     class Meta:
         db_table = "documents_topics"

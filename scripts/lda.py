@@ -1,28 +1,25 @@
 # -*- coding: utf-8 -*-
 """
-À partir d'un corpus au format bag-of-words sous forme d'un fichier Matrix Market (.mm) 
+À partir d'un corpus au format bag-of-words sous forme d'un fichier Matrix Market (.mm)
 et du dictionnaire associé, ce script applique l'algorithme LDA et génère deux fichiers :
-    
+
     - nom_du_corpus_lda.mm : La représentation matricielle du corpus une fois appliqué
     l'algorithme LDA à chaque document
-    
+
     - nom_du_corpus_topics.txt : Les topics trouvés par l'algorithme
 """
 
-import logging  
+import logging
 import os
 import argparse
-import re
 import glob
-    
-import utils
 from gensim import corpora, models
 
-parser = argparse.ArgumentParser(description="""Applique l'algorithme LDA sur un corpus""");
-parser.add_argument('nb_topics', type=int, 
+parser = argparse.ArgumentParser(description="""Applique l'algorithme LDA sur un corpus""")
+parser.add_argument('nb_topics', type=int,
                     help="Le nombre de topics voulus")
 parser.add_argument('--nb_passes', type=int, default=3,
-                    help="""Le nombre de passes effectuées par l'algorithme. 
+                    help="""Le nombre de passes effectuées par l'algorithme.
                     Par défaut : 3""")
 parser.add_argument('-v', '--verbose', action='store_true',
                     help="Afficher les messages d'information")
@@ -31,6 +28,8 @@ args = parser.parse_args()
 if args.verbose:
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
+# On cherche les fichiers terminant par _bow.mm et _wordids.txt dans le
+# dossier courant. Ces fichiers sont produits par le script corpus_to_matrix.py
 mm_corpus = glob.glob('*_bow.mm')
 dictionary = glob.glob('*_wordids.txt')
 
@@ -49,13 +48,14 @@ try:
 except Exception:
     raise IOError("""Le fichier _bow.mm a été trouvé, mais impossible de l'ouvrir""")
 
-try:    
+try:
     id2word = corpora.dictionary.Dictionary.load_from_text(dictionary[0])
 except Exception:
     raise IOError("""Le fichier _wordids.txt a été trouvé, mais impossible de l'ouvrir""")
 
-lda = models.ldamodel.LdaModel(corpus=corpus,id2word=id2word,
-                                       num_topics=args.nb_topics, passes=args.nb_passes) 
+corpus_name = mm_corpus[0].rstrip('_bow.mm')
+
+lda = models.ldamodel.LdaModel(corpus=corpus, id2word=id2word, num_topics=args.nb_topics, passes=args.nb_passes)
 lda.save(corpus_name + '_ldamodel')
 corpora.mmcorpus.MmCorpus.serialize(corpus_name + '_lda.mm', lda[corpus], progress_cnt=1000)
 
