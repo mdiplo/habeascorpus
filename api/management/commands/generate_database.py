@@ -115,10 +115,9 @@ def add_documents(raw_corpus_file, lda_corpus_file, topics):
 
 def compute_topic_history(topic):
     """
-    Calcule l'historique du topic sous la forme d'un dictionnaire
-    {year: weight, ...} où weight est le poids du topic calculé sur tous les
-    articles écrits avant year. Ainsi, on peut retrouver le poids entre 
-    year1 et year2 par soustraction.
+    Calcule l'historique du topic sous la forme d'une liste
+    [{'year': 1958, 'weight': 0.4 ...}, {...}] où weight est le poids du topic
+    calculé sur tous les articles écrits pendant l'année year. 
 
     """
 
