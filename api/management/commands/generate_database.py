@@ -60,8 +60,9 @@ def add_topics(topics_file):
     topics = []
     with open(topics_file, 'r') as inp:
         transaction.set_autocommit(False)
-        for i, line in enumerate(inp):
-            topic = Topic(related_words=line, weight_in_corpus=0)
+        topics_from_file = eval(inp.read())  # topics_from_file = [[{'word': 'chine', weight_in_topic: 0.8},...], [...]]
+        for t in topics_from_file:
+            topic = Topic(related_words=t, weight_in_corpus=0)
             topic.save()
             topics.append(topic)
         transaction.commit()
@@ -133,14 +134,12 @@ def compute_topic_history(topic):
                 aggregate(weight=Sum('weight_in_document'))
 
         if query['weight']:
-            history.append({'date': datetime.date(year, 1, 1), 'weight': query['weight']})
+            history.append({'date': year, 'weight': query['weight']})
             total_weight += query['weight']
         else:
-            history.append({'date': datetime.date(year, 1, 1), 'weight': 0.0})
+            history.append({'date': year, 'weight': 0.0})
 
     topic.history = json.dumps(history, cls=utils.MyJsonEncoder)
-    print topic.history
-    #poids total = poids des articles écrits avant lastyear
     topic.weight_in_corpus = total_weight
     topic.save()
     transaction.commit()

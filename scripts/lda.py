@@ -60,5 +60,5 @@ lda.save(corpus_name + '_ldamodel')
 corpora.mmcorpus.MmCorpus.serialize(corpus_name + '_lda.mm', lda[corpus], progress_cnt=1000)
 
 with open(corpus_name + '_topics.txt', 'w') as f:
-    for i in range(args.nb_topics):
-        f.write('\t'.join(str(x) for x in lda.show_topic(i)) + '\n')
+    history = [[{'word': x[1], 'weight_in_topic': x[0]} for x in lda.show_topic(i)] for i in range(args.nb_topics)]
+    f.write(history)
