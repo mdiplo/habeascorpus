@@ -1,9 +1,13 @@
 # habeascorpus
 
-analyse un corpus de textes avec gensim, et fait des trucs avec
+Outil d'exploration de corpus. Organisé en trois composants :
+- /scripts : permet d'appliquer des algorithmes qui déterminent des topics dans un corpus en utilisant la bibliothèque Gensim (http://radimrehurek.com/gensim/).
+- /api : API RESTful (http://www.django-rest-framework.org/) sous forme de serveur qui répond aux requêtes GET (dans un navigateur web) pour renvoyer les données du corpus calculées avec Gensim.
+- /browser : un navigateur web Angularjs (http://angularjs.org/) qui consomme l'API pour permettre la visualisation des données, en utilisant notamment d3.js (http://d3js.org/)
 
 ## Préparation des données
-le corpus se présente sous la forme d'un grand fichier TSV (un article par ligne)
+
+Le corpus se présente sous la forme d'un fichier TSV (un article par ligne)
 
 Pour SPIP on peut exporter sa base comme suit :
 
@@ -16,44 +20,58 @@ echo "SELECT a.id_article,a.titre, a.chapo,a.texte,a.lang, GROUP_CONCAT(DISTINCT
 Une fois le fichier `corpus.tsv` obtenu, on le place dans un dossier `data` qui va contenir l'ensemble des fichiers générés par `habeascorpus`. On calcule la représentation bag-of-words du corpus en lançant depuis le dossier `data` :
 
 ```
-python $habeascorpus/corpus_to_matrix.py corpus.tsv -v
+python $habeascorpus/scripts/corpus_to_matrix.py corpus.tsv -v
 ```
 
 où `$habeascorpus` est le chemin de `habeascorpus` sur le disque dur.
 
-On obtient ainsi dans le dossier `data` le fichier `corpus_wordids.txt` qui associe un id à chaque mot du corpus, et le fichier `corpus_bow.mm`, qui indique pour chaque document les mots qu'il contient.
+On obtient ainsi dans le dossier `data` le fichier dictionnaire `corpus_wordids.txt` qui associe un id à chaque mot du corpus, et le fichier `corpus_bow.mm`, représentation bag-of-words du corpus.
 
-## Calcul des topics
+## Algorithmes
 
 On peut ensuite appliquer l'algorithme LDA qui détermine les topics du corpus (ici on demande 100 topics):
 
 ```
-python $habeascorpus/lda.py 100 -v
+python $habeascorpus/scripts/lda.py 100 -v
 ```
 
 Cette commande produit le fichier `corpus_lda.mm`, qui indique pour chaque document les topics qui lui sont reliés. Elle produit également le fichier `corpus_topics.txt`, qui liste les topics du corpus.
 
-## Explorateur de topics
+## API
 
-### Installation
-`pip install SQLAlchemy`
-`pip install Django`
+L'API RESTful permet de récupérer les données calculées précédemment en effectuant des requêtes GET.
+
+### Initialisation
+
+Il faut commencer par créer une base de données contenant les données précedemment calculées. Depuis le dossier `data` :
+
+```
+python $habeascorpus/manage.py generate_database
+```
 
 ### Utilisation
-On peut maintenant explorer le corpus dans un navigateur, en générant au préalable une base de données contenant les informations nécessaires :
+
+Pour démarrer l'API, lancer depuis le dossier `data` la commande :
 
 ```
-python $habeascorpus/browser/generate_database.py 
-python $habeascorpus/browser/server.py
+python $habeascorpus/api/manage.py runserver
 ```
 
-Puis on charge la page `localhost:9000/cloud` dans un navigateur web.
+On accède à l'API en entrant l'url http://127.0.0.1:8000/api/ dans un navigateur web.
 
-### Routes accessibles :
-- /cloud : un nuage des mots importants dans le corpus
-- /topics : la liste des topics
-- /topics/id : les détails sur le topic id
-- /articles/id : les détails sur l'article id
+### Requêtes
+
+- `http://127.0.0.1:8000/api/documents/` : liste des documents du corpus
+- `http://127.0.0.1:8000/api/documents/id/` : détails d'un document
+
+- `http://127.0.0.1:8000/api/topics/` : liste des topics
+- `http://127.0.0.1:8000/api/topics/id/` : détails d'un topic
+- `http://127.0.0.1:8000/api/topics/id/history/` : historique d'un topic
+
+## Navigateur 
+
+Pour visualiser les données dans un navigateur web, démarrer l'API et accéder à l'URL `http://127.0.0.1:8000/static/index.html`
+
 
 
 
