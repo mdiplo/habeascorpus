@@ -40,3 +40,4 @@ nosetests.xml
 *.sqlite3
 data
 env
+doc
