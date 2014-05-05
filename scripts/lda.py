@@ -13,6 +13,7 @@ import logging
 import os
 import argparse
 import glob
+import json
 from gensim import corpora, models
 
 parser = argparse.ArgumentParser(description="""Applique l'algorithme LDA sur un corpus""")
@@ -60,5 +61,5 @@ lda.save(corpus_name + '_ldamodel')
 corpora.mmcorpus.MmCorpus.serialize(corpus_name + '_lda.mm', lda[corpus], progress_cnt=1000)
 
 with open(corpus_name + '_topics.txt', 'w') as f:
-    history = [[{'word': x[1], 'weight_in_topic': x[0]} for x in lda.show_topic(i)] for i in range(args.nb_topics)]
-    f.write(history)
+    topics = [[{'word': x[1], 'weight_in_topic': x[0]} for x in lda.show_topic(i)] for i in range(args.nb_topics)]
+    f.write(json.dumps(topics))
