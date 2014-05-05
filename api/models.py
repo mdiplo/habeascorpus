@@ -37,10 +37,7 @@ class Topic(models.Model):
         
         """
         
-        words_tuples = map(eval, self.related_words.split('\t'))
-        words_tuples = sorted(words_tuples, reverse=True)
-        return [{'word': word, 'weight_in_topic': weight_in_topic}
-                for (weight_in_topic, word) in words_tuples]
+        return eval(self.related_words)
 
     def get_history(self):
         """
