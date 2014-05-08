@@ -1,6 +1,41 @@
 # -*- coding: utf-8 -*-
 import os
 import nltk
+import re
+
+
+class Document:
+
+    def __init__(self, raw_document):
+        id, title, chapo, text, lang, authors, keywords, date = raw_document.rstrip('\n').split('\t')
+
+        self.id = id
+        self.title = title
+        self.chapo = chapo
+        self.text = unicode(text, 'utf8')
+        self.lang = lang
+        self.authors = authors.split(', ')
+        self.keywords = set(keywords.split(', '))
+        self.date = date
+
+    def __str__(self):
+        id = self.id
+        title = self.title
+        chapo = self.chapo
+        text = self.text.encode('utf8')
+        lang = self.lang
+        authors = ', '.join(self.authors)
+        keywords = ', '.join(self.keywords)
+        date = self.date
+
+        return '\t'.join([id, title, chapo, text, lang, authors, keywords, date]) + '\n'
+
+    def get_text_tokens(self):
+        text_tokens = [t.lower() for t in re.split(r'\W+', self.text, 0, re.UNICODE)[1:-1]]
+        return text_tokens
+
+    def remove_text(self, s):
+        self.text = re.sub(s, '', self.text)
 
 
 def tokenize(texte, stopwords=None, stem=False):
@@ -38,12 +73,17 @@ def split_path(file_path):
     return {'name': name, 'file_name': file_name, 'path': file_path}
 
 
-def get_article(n, tsv_file):
-    """Renvoie l'article dont le numéro dans le corpus est n"""
+def get_article_by_id(id, docid_file):
+    """Renvoie l'index dans le corpus de l'article dont l'id est id"""
 
-    with open(tsv_file, 'r') as f:
-        f.readline()  # On passe la première ligne qui contient le nom des colonnes
+    with open(docid_file, 'r') as f:
+        for i, line in enumerate(f):
+            if id == int(line):
+                return i
+
+
+def get_article_by_corpus_number(n, docid_file):
+    with open(docid_file, 'r') as f:
         for i, line in enumerate(f):
             if i == n:
-                (_, titre, _, texte, _, auteur, _, date) = line.split('\t')
-                return {'titre': titre, 'texte':   texte, 'date': date, 'auteur': auteur}
+                return int(line)
