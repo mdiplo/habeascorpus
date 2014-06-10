@@ -67,6 +67,7 @@ class Document(models.Model):
     mots = models.CharField(max_length=100)
     date = models.DateField(null=True)
     topics = models.ManyToManyField(Topic, through='DocumentTopic', related_name='documents')
+    neighbours = models.ManyToManyField('self', through='NeighbourGraphEdge', related_name='documents', symmetrical=False)
 
     class Meta:
         db_table = 'documents'
@@ -96,6 +97,10 @@ class Document(models.Model):
 
         return doc
 
+    def get_neighbours(self):
+        neighbours = NeighbourGraphEdge.objects.filter(document1__id=self.id)
+        return [{'document': n.document2, 'similarity': n.similarity} for n in neighbours]
+
 
 class DocumentTopic(models.Model):
     """
@@ -114,3 +119,18 @@ class DocumentTopic(models.Model):
 
     class Meta:
         db_table = "documents_topics"
+
+
+class NeighbourGraphEdge(models.Model):
+    """
+    Cette classe représente la relation many-to-many entre des documents
+    afin d'indiquer la proximité sémantique entre deux documents
+
+    """
+
+    document1 = models.ForeignKey(Document, related_name="document1")
+    document2 = models.ForeignKey(Document, related_name="document2")
+    similarity = models.FloatField()
+
+    class Meta:
+        db_table = "documents_graph"

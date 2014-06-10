@@ -13,14 +13,14 @@ class HabeasCorpus(corpora.TextCorpus):
     de récupérer un fichier sous la forme de tokens
     """
 
-    def __init__(self, corpus_file, stop_words=None):
+    def __init__(self, corpus_file, stopwords=None):
         """
         :Parameters:
             -`stop_words` : liste de stopwords à ignorer
 
         """
 
-        self.stop_words = set(stop_words).union(set(stopwords.words('french')))
+        self.stopwords = set(stopwords)
         super(HabeasCorpus, self).__init__(corpus_file)
 
     def get_texts(self):
@@ -31,7 +31,7 @@ class HabeasCorpus(corpora.TextCorpus):
                     document = utils.Document(raw_line)
                 except Exception:
                     raise ValueError("La ligne n°%d n'est pas au bon format" % (i+1))
-                yield document.get_text_tokens()
+                yield document.get_tokens(self.stopwords)
 
 
 def file_read(f):

@@ -6,20 +6,19 @@ Génère la base de données sqlite nécessaire pour explorer le corpus.
 
 import glob
 import os.path
-import datetime
 import json
 from api import utils
-from gensim import corpora
+from gensim import corpora, similarities
 from django.core import management
 from django.core.management.base import BaseCommand
-from api.models import Topic, Document, DocumentTopic
+from api.models import Topic, Document, DocumentTopic, NeighbourGraphEdge
 from django.db import transaction
 from django.db.models import Sum, Min, Max
 
 
 class Command(BaseCommand):
     arg = 'Nom du corpus'
-    #help = 'Génère la base de données du corpus corpus_name' => problème unicode
+    # help = 'Génère la base de données du corpus corpus_name' => problème unicode
 
     def handle(self, *args, **options):
 
@@ -28,6 +27,7 @@ class Command(BaseCommand):
         tsv_corpus = glob.glob(os.path.join(corpus_data_dir, '*.tsv'))
         lda_corpus = glob.glob(os.path.join(corpus_data_dir, '*_lda.mm'))
         topics = glob.glob(os.path.join(corpus_data_dir, '*_topics.txt'))
+        docid = glob.glob(os.path.join(corpus_data_dir, '*_docid.txt'))
 
         if not tsv_corpus:
             raise IOError("""Impossible de trouver le fichier .tsv
@@ -38,12 +38,17 @@ class Command(BaseCommand):
         if not topics:
             raise IOError("""Impossible de trouver le fichier topics.txt
             dans le dossier %s""" % (os.getcwd()))
+        if not docid:
+            raise IOError("""Impossible de trouver le fichier topics.txt
+            dans le dossier %s""" % (os.getcwd()))
+
 
         management.call_command('syncdb')
         topics = add_topics(topics[0])
         add_documents(tsv_corpus[0], lda_corpus[0], topics)
         for topic in topics:
             compute_topic_history(topic)
+        find_neighbours(lda_corpus[0], docid[0])
 
 
 def add_topics(topics_file):
@@ -69,6 +74,7 @@ def add_topics(topics_file):
 
     return topics
 
+
 def add_documents(raw_corpus_file, lda_corpus_file, topics):
     """
     Ajoute dans la table documents les articles d'un fichier .tsv contenant 8 colonnes :
@@ -87,22 +93,25 @@ def add_documents(raw_corpus_file, lda_corpus_file, topics):
         -`raw_corpus_file`: Le fichier .tsv contenant les documents
         -`lda_corpus_file`: Le fichier _lda.mm 
         -`topics` : Une liste l contenant tous les topics telle que l[i] = Topic(id = i+1)
+        -`docid` : Un fichier de correspondance id diplo <-> id corpus
 
     """
     try:
         lda = corpora.mmcorpus.MmCorpus(lda_corpus_file)
     except:
         raise IOError("""Impossible de charger le fichier _lda.mm""")
-        
+
     with open(raw_corpus_file, 'r') as raw:
-        raw.readline() #on ignore la première ligne qui contient les noms des colonnes
+        raw.readline()  # on ignore la première ligne qui contient les noms des colonnes
         transaction.set_autocommit(False)
         for docno, raw_line in enumerate(raw):
-            #lda[docno] donne les topics associés au document raw_line sous la forme
-            #d'une liste de tuples (id_topic, poids du topic id_topic dans le document docno)  
+            # lda[docno] donne les topics associés au document raw_line sous la forme
+            # d'une liste de tuples (id_topic, poids du topic id_topic dans le document docno)
+
             print "Document n°" + str(docno)
             doc = Document.create_document(raw_line.rstrip().split('\t'))
             doc.save()
+
             for id_topic, weight_in_document in lda[docno]:
                 doc_topic = DocumentTopic(document=doc,
                         topic=topics[id_topic],
@@ -144,3 +153,33 @@ def compute_topic_history(topic):
     transaction.commit()
 
     print "Historique topic %d" % (topic.id)
+
+
+def find_neighbours(lda_corpus_file, docid_file):
+    """
+    Construit le graphe des documents qui indique pour chaque document les
+    documents qui lui sont proches sémantiquement
+
+    """
+
+    try:
+        lda_corpus = corpora.mmcorpus.MmCorpus(lda_corpus_file)
+    except:
+        raise IOError("""Impossible de charger le fichier _lda.mm""")
+
+    transaction.set_autocommit(False)
+    index = similarities.MatrixSimilarity(lda_corpus)
+
+    for i, document in enumerate(Document.objects.all()):
+        sims = index[lda_corpus[utils.get_article_by_id(document.id, docid_file)]]
+        sims = sorted(enumerate(sims), key=lambda item: -item[1])
+
+        for neighbour in sims[:10]:
+            document2 = Document.objects.get(pk=utils.get_article_by_corpus_number(neighbour[0], docid_file))
+            edge = NeighbourGraphEdge(document1=document, document2=document2, similarity=neighbour[1])
+            edge.save()
+
+        if i % 1000 == 0:
+            transaction.commit()
+
+        print "Voisins du document %d " % (i)

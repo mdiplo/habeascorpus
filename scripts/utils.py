@@ -11,8 +11,11 @@ class Document:
 
         self.id = id
         self.title = title
-        self.chapo = chapo
-        self.text = unicode(text, 'utf8')
+        self.chapo = unicode(chapo, 'utf8')
+        text = unicode(text, 'utf8')
+	text = re.sub('\\\\n', '', text)
+	text = re.sub('\\n', '', text)
+	self.text = text 
         self.lang = lang
         self.authors = authors.split(', ')
         self.keywords = set(keywords.split(', '))
@@ -21,7 +24,7 @@ class Document:
     def __str__(self):
         id = self.id
         title = self.title
-        chapo = self.chapo
+        chapo = self.chapo.encode('utf8')
         text = self.text.encode('utf8')
         lang = self.lang
         authors = ', '.join(self.authors)
@@ -30,8 +33,8 @@ class Document:
 
         return '\t'.join([id, title, chapo, text, lang, authors, keywords, date]) + '\n'
 
-    def get_text_tokens(self):
-        text_tokens = [t.lower() for t in re.split(r'\W+', self.text, 0, re.UNICODE)[1:-1]]
+    def get_tokens(self, stopwords):
+        text_tokens = [t.lower() for t in re.split(r'\W+', self.chapo + self.text, 0, re.UNICODE)[1:-1] if t.lower() not in stopwords]
         return text_tokens
 
     def remove_text(self, s):
@@ -78,12 +81,52 @@ def get_article_by_id(id, docid_file):
 
     with open(docid_file, 'r') as f:
         for i, line in enumerate(f):
-            if id == int(line):
+            id_article, titre = line.split('\t')
+            if id == int(id_article):
                 return i
 
 
 def get_article_by_corpus_number(n, docid_file):
     with open(docid_file, 'r') as f:
         for i, line in enumerate(f):
+            id_article, titre = line.split('\t')
             if i == n:
-                return int(line)
+                return int(id_article)
+                
+def get_article_title_by_id(id, docid_file):
+    """Renvoie le titre dans le corpus de l'article dont l'id est id"""
+
+    with open(docid_file, 'r') as f:
+        for i, line in enumerate(f):
+            id_article, titre = line.split('\t')
+            if id == int(id_article):
+                return titre
+                
+def similarity_measure(v1, v2, distance):
+    """
+    v1 et v2 étant des vecteurs donnés sous la forme v1 = [(2, 1), (4,2)]
+    pour représenter le vecteur [0,0,1,0,2], calcule la distance entre
+    v1 et v2.
+    distance est une fonction qui à deux scalaires x, y renvoie la distance
+    entre x et y
+    """
+    
+    measure = 0
+    i, j = 0, 0
+    
+    while i < len(v1) and j < len(v2):
+        if v1[i][0] == v2[j][0]:
+            measure += distance(v1[i][1], v2[j][1])
+            i += 1
+            j += 1
+        
+        elif v1[i][0] > v2[j][0]:
+            j += 1
+        
+        else:
+            i += 1 
+    
+    return measure
+    
+    
+    

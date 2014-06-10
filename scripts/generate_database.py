@@ -9,7 +9,7 @@ import glob
 import os.path
 import sys
 import logging
-from gensim import corpora
+from gensim import corpora, similarities
 
 root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(root_dir)  #TODO : faire fonctionner les import relatif (from .. import utils)
@@ -59,13 +59,13 @@ def add_documents(raw_corpus_file, lda_corpus_file, topics, session):
     except:
         raise IOError("""Impossible de trouver le fichier _lda.mm
         dans le dossier %s""" % (os.getcwd()))
-        
+
     with open(raw_corpus_file, 'r') as raw:
-        raw.readline() #on ignore la première ligne qui contient les noms des colonnes
+        raw.readline()  # on ignore la première ligne qui contient les noms des colonnes
         for docno, raw_line in enumerate(raw):
-            #lda[docno] donne les topics associés au document raw_line sous la forme
-            #d'une liste de tuples (id_topic, poids du topic id_topic dans le document docno)  
-            
+            # lda[docno] donne les topics associés au document raw_line sous la forme
+            # d'une liste de tuples (id_topic, poids du topic id_topic dans le document docno)  
+
             doc = Document(raw_line.rstrip().split('\t'))
             for id_topic, weight_in_document in lda[docno]:
                 doc_topic = DocumentTopic(weight_in_document=weight_in_document)

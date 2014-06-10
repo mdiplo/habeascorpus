@@ -54,3 +54,19 @@ class DocumentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
     paginate_by = 10
+
+
+class DocumentNeighbours(generics.ListAPIView):
+    """Renvoie les documents similaires à un document donné"""
+
+    serializer_class = DocumentSerializer
+
+    def get_queryset(self):
+        pk = self.kwargs['pk']
+        return Topic.objects.\
+                get(pk=pk).\
+                documents.\
+                order_by('-documenttopic__weight_in_document').\
+                all()
+
+
