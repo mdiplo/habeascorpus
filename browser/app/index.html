@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html ng-app="habeascorpus">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Topics du corpus</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/charts.css">
+  </head>
+  <body>
+    <nav class="navbar navbar-static-top navbar-inverse" role="navigation">
+      <div class="container">
+        <ul class="nav navbar-nav">
+          <li><a href='/cloud'>Nuage de mots</a></li>
+          <li><a href='#/topics/'>Topics</a></li>
+        </ul>
+        <div class="right menu">
+          <a class="popup icon github item" data-content="Voir le projet sur github"
+             href="https://github.com/Fil/habeascorpus">
+            <i class="icon github"></i> 
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div ng-view id="pagebody">
+    </div>
+    
+    <footer>
+      <p>Euh... ?
+      </p>
+    </footer>
+    <script src="lib/d3/d3.min.js"></script>
+    <script src="lib/jquery/jquery-1.11.0.min.js"></script>
+    <script src="lib/angular/angular.js"></script>
+    <script src="lib/angular/angular-route.js"></script>
+    <script src="lib/angular/angular-resource.js"></script>
+
+    <script src="vendors/d3.js"></script>
+    <script src="vendors/pagination/pagination.js"></script>
+
+    <script src="js/services.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/controllers.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/directives.js"></script>
+  </body>
+</html>
