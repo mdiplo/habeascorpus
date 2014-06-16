@@ -31,7 +31,7 @@ c = csv.writer(open(args.corpus_name + '_' + args.method + '_test', 'wb'))
 c.writerow(['Article_de_référence', 'Voisin_n°1', 'Voisin_n°2', 'Voisin_n°3', 'Voisin_n°4', 'Voisin_n°5'])
 
 for id in tested_articles:
-    similar = similar_articles.find_similar_articles(corpus_file, index_file, docid_file, id)
+    similar = similar_articles.find_similar_articles(args.corpus_name, args.method, id)
     l = [utils.get_article_title_by_id(id, docid_file)]
     l.extend([(utils.get_article_title_by_id(x[0], docid_file), x[1], x[0]) for x in similar])
     c.writerow(l)

@@ -41,7 +41,7 @@ class Document:
         self.text = re.sub(s, '', self.text)
 
 
-def tokenize(texte, stopwords=None, stem=False):
+def tokenize(texte, stopwords=set([]), stem=False):
     """
     Renvoie un texte sous forme de liste de mots, en retirant les mots trop
     communs (ex: le, la, est,...).
@@ -52,9 +52,8 @@ def tokenize(texte, stopwords=None, stem=False):
 
     """
 
-    tokens_2d = [nltk.word_tokenize(sent) for sent in nltk.sent_tokenize(texte)]
-    tokens = [x.lower() for sublist in tokens_2d for x in sublist
-              if x.isalpha() and x.lower() not in stopwords]
+    tokens = [t.lower() for t in re.split(r'\W+', texte, 0, re.UNICODE) if t.lower() not in stopwords]
+    
     if stem:
         stemmer = nltk.stem.snowball.FrenchStemmer()
         tokens = map(stemmer.stem, tokens)

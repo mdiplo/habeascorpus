@@ -14,7 +14,7 @@ import os
 import argparse
 import glob
 import json
-from gensim import corpora, models
+from gensim import corpora, models, similarities
 
 parser = argparse.ArgumentParser(description="""Applique l'algorithme LDA sur un corpus""")
 parser.add_argument('corpus_name', type=str,
@@ -50,7 +50,7 @@ except Exception:
 
 
 lda = models.ldamodel.LdaModel(corpus=corpus, id2word=id2word, num_topics=args.nb_topics, passes=args.nb_passes)
-lda.save(args.corpus_name + '_ldamodel' + str(args.nb_topics))
+lda.save(args.corpus_name + '_lda'  + str(args.nb_topics) + '_model')
 corpora.mmcorpus.MmCorpus.serialize(args.corpus_name + '_lda' + str(args.nb_topics) + '.mm', lda[corpus], progress_cnt=1000)
 
 if args.saveindex:

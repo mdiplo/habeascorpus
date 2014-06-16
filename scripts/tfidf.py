@@ -41,7 +41,7 @@ except Exception:
     raise IOError("""Impossible d'ouvrir le fichier %s""" % dictionary_file)
 
 tfidf = models.tfidfmodel.TfidfModel(corpus=corpus, id2word=id2word)
-tfidf.save(args.corpus_name + '_tfidfmodel')
+tfidf.save(args.corpus_name + '_tfidf_model')
 corpora.mmcorpus.MmCorpus.serialize(args.corpus_name + '_tfidf.mm', tfidf[corpus], progress_cnt=1000)
 
 if args.saveindex:
