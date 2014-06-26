@@ -17,7 +17,11 @@ echo "SELECT a.id_article,a.titre, a.chapo,a.texte,a.lang, GROUP_CONCAT(DISTINCT
 
 (ici avec un test sur le statut 'publié') ; ce format permet d'extraire facilement avec `grep` le nombre d'articles écrits par Untel (ou parlant de "truc"), ou avec `wc` de mesurer le nombre de mots et de signes correspondants (voir http://seenthis.net/messages/224616).
 
-Une fois le fichier `corpus.tsv` obtenu, on le place dans un dossier `data` qui va contenir l'ensemble des fichiers générés par `habeascorpus`. On calcule la représentation bag-of-words du corpus en lançant depuis le dossier `data` :
+Une fois le fichier `corpus.tsv` obtenu, on le place dans un dossier `data` qui va contenir l'ensemble des fichiers générés par `habeascorpus`. 
+
+# Représentation bag-of-words
+
+La première étape est le calcul de la représentation bag-of-words du corpus :
 
 ```
 python $habeascorpus/scripts/corpus_to_matrix.py corpus.tsv -v
@@ -25,17 +29,73 @@ python $habeascorpus/scripts/corpus_to_matrix.py corpus.tsv -v
 
 où `$habeascorpus` est le chemin de `habeascorpus` sur le disque dur.
 
+L'option `--stopwords=stopwords_file` permet d'ignorer certains mots.
+
 On obtient ainsi dans le dossier `data` le fichier dictionnaire `corpus_wordids.txt` qui associe un id à chaque mot du corpus, et le fichier `corpus_bow.mm`, représentation bag-of-words du corpus.
 
 ## Algorithmes
 
-On peut ensuite appliquer l'algorithme LDA qui détermine les topics du corpus (ici on demande 100 topics):
+On peut ensuite appliquer divers algorithmes:
+
+### TFIDF
 
 ```
-python $habeascorpus/scripts/lda.py 100 -v
+python $habeascorpus/scripts/tfidf.py corpus_name -v
 ```
 
-Cette commande produit le fichier `corpus_lda.mm`, qui indique pour chaque document les topics qui lui sont reliés. Elle produit également le fichier `corpus_topics.txt`, qui liste les topics du corpus.
+(`corpus_name` est le nom du fichier contenant les articles sans l'extension `.tsv`)
+
+L'option `--saveindex` permet de sauvegarder un fichier d'index (utile pour la recherche de doublons, traductions,...)
+
+### LDA
+```
+python $habeascorpus/scripts/lda.py corpus_name nb_topics -v
+```
+
+L'option `--saveindex` permet de sauvegarder un fichier d'index (utile pour la recherche de contenu similaire)
+
+### LSI
+```
+python $habeascorpus/scripts/lsi.py corpus_name nb_topics -v
+```
+
+L'option `--saveindex` permet de sauvegarder un fichier d'index (utile pour la recherche de contenu similaire)
+
+## Trucs cools à faire
+
+### Traduction
+
+Pour associer les articles d'un `corpus_etranger` à leur traduction dans `corpus_fr` :
+
+```
+python $habeascorpus/scripts/translate_corpus.py corpus_fr corpus_etranger.tsv output_name -v
+```
+
+### Doublons
+
+Pour détecter les doublons dans un corpus :
+
+```
+python $habeascorpus/scripts/find_doublons.py corpus_name -v
+```
+
+### Contenu similaire
+
+Pour trouver les articles similaires à `article.txt` dans un corpus :
+
+```
+cat article.txt | python $habeascorpus/scripts/similar_articles.py corpus_name method -v
+```
+
+Avec `method` : `tfidf`, `lda100`, `lda50`, `lsi100`,... 
+
+### Matrice de similarité
+
+Pour construire la matrice de similarités pour un corpus :
+
+```
+python $habeascorpus/scripts/similarity_matrix.py corpus_name method -v
+```
 
 ## API
 
