@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Ce script prend un texte en entrée, et un fichier contenant les représentations
-bag-of-words d'un corpus, puis détermine si le texte possède une traduction dans
-le corpus
+Ce script prend en entrée un corpus de référence et un corpus "étranger", 
+puis recherche pour chaque article du corpus étranger s'il possède une traduction
+dans le corpus de référence.
+Les résultats sont enregistrés dans un fichier.
 
 """
 
@@ -24,35 +25,29 @@ def find_translation(text, corpus_name, index, dico, corpus, tfidfmodel):
     docid_path = corpus_name + '_docid.txt'
 
     gs = goslate.Goslate(timeout=100)
-    text = gs.translate(text, 'fr')
+    
+    # On traduit en français le texte fourni par l'utilisateur
+    # Utilise l'API google qui détexte automatiquement le langage 
+    try:
+        translated_text = gs.translate(text, 'fr')
+    except Exception:
+        translated_text = text
+       
+    # On tokenize le texte fourni grâce au dictionnaire 
     vec_bow = dico.doc2bow(utils.tokenize(translated_text))
+    
+    # On applique la transformation tfidf 
     vec_tfidf = tfidfmodel[vec_bow]
 
+    # On renvoie le plus proche voisin de la traduction dans le corpus
     sims = index[vec_tfidf]
     sims = sorted(enumerate(sims), key=lambda item: -item[1])
-    
     return (utils.get_article_by_corpus_number(sims[0][0], docid_path), sims[0][1])
-    
-    #distance = lambda vec1, vec2 : vec1 + vec2 
-
-    #neighbour_index = -1
-    #max_similarity = -1
-    #best_vec = []
-
-    #print vec_tfidf
-
-    #for i, document in enumerate(corpus):
-    #    distance_from_vec_tfidf = utils.similarity_measure(vec_tfidf, document, distance)
-    #    print (utils.get_article_by_corpus_number(i+1, docid_path), distance_from_vec_tfidf)
-    #    if distance_from_vec_tfidf > max_similarity:
-    #        neighbour_index = i
-    #        max_similarity = distance_from_vec_tfidf
-    #        best_vec = document
-    #        
-    #print (utils.get_article_by_corpus_number(neighbour_index, docid_path), max_similarity)
+   
     
 if __name__ == '__main__':
 
+    # Les arguments à fournir en ligne de commande
     parser = argparse.ArgumentParser(description="""Vérifie si le texte en entrée standard possède une traduction dans le corpus""")
     parser.add_argument('corpus_fr', type=str, help='Le nom du corpus')
     parser.add_argument('corpus_etranger', type=str, help='Le nom du corpus')
@@ -61,6 +56,7 @@ if __name__ == '__main__':
                         help="Afficher les messages d'information")
     args = parser.parse_args()
 
+    # L'option -v affiche les messages d'information
     if args.verbose:
         logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
         
@@ -69,42 +65,51 @@ if __name__ == '__main__':
     corpus_path = args.corpus_fr + '_tfidf.mm'
     tfidfmodel_path = args.corpus_fr + '_tfidf_model'
     
+    # Chargement du corpus  
+    try:
+        corpus = corpora.mmcorpus.MmCorpus(corpus_path)
+    except Exception:
+        raise IOError("""Impossible de charger le fichier %s. Avez-vous bien appliqué le script corpus_to_matrix.py ?""" % (corpus_path))
+    
+    # Chargement du fichier d'index
     try:
         index = similarities.docsim.Similarity.load(index_file)
     except Exception:
-        raise IOError('Impossible de charger le fichier %s' % (index_file))
+        raise IOError("""Impossible de charger le fichier %s. Avez-vous bien appliqué le script tfidf.py avec l'option --saveindex ?""" % (index_file))
         
+    # Chargement du dictionnaire
     try:
         dico = corpora.Dictionary.load_from_text(dic_path)
     except Exception:
         raise IOError('Impossible de charger le fichier %s' % (dic_path))
-        
-    try:
-        corpus = corpora.mmcorpus.MmCorpus(corpus_path)
-    except Exception:
-        raise IOError('Impossible de charger le fichier %s' % (corpus_path))
-        
+     
+    # Chargement du modèle   
     try:
         tfidfmodel = models.tfidfmodel.TfidfModel.load(tfidfmodel_path)
     except Exception:
-        raise IOError('Impossible de charger le fichier %s' % (tfidfmodel_path))
+        raise IOError("""Impossible de charger le fichier %s. Avez-vous bien appliqué le script tfidf ?""" % (tfidfmodel_path))
         
     f = open(args.corpus_etranger)
     o = open(args.translate_file, 'w')
         
     for i, l in enumerate(f):
+    
+        # Pour chaque document, on récupère la traduction supposée et le score de proximité
         doc = utils.Document(l)
         trad, score = find_translation(doc.text, args.corpus_fr, index, dico, corpus, tfidfmodel)
         
+        # Si le score est supérieur à 0.4, la traduction a de très fortes chances d'être la bonne
         if score >= 0.4:
             o.write(str(doc.id) + '\t' + str(trad) + '\n')
-            
+        
+        # Si le score est compris entre 0.35 et 0.4, la traduction supposée est peut-être inexacte
         elif score >= 0.35 and score < 0.4:
             o.write(str(doc.id) + '\t' + str(trad) + '?\n')
-            
+        
+        # En dessous de 0.35, le texte ne possède probablement pas de traduction dans le 
+        # corpus de référence
         else:
             o.write(str(doc.id) + '\t?\n')
         
-        print i
-
-
+        if args.verbose:
+            print "Document %d traité" % (i)
