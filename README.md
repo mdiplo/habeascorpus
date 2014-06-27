@@ -19,12 +19,17 @@ echo "SELECT a.id_article,a.titre, a.chapo,a.texte,a.lang, GROUP_CONCAT(DISTINCT
 
 Une fois le fichier `corpus.tsv` obtenu, on le place dans un dossier `data` qui va contenir l'ensemble des fichiers générés par `habeascorpus`. 
 
+```
+corpus="articles_fr"
+habeascorpus=`/chemin/vers/habeascorpus`
+```
+
 # Représentation bag-of-words
 
 La première étape est le calcul de la représentation bag-of-words du corpus :
 
 ```
-python $habeascorpus/scripts/corpus_to_matrix.py corpus.tsv -v
+python $habeascorpus/scripts/corpus_to_matrix.py $corpus.tsv -v
 ```
 
 où `$habeascorpus` est le chemin de `habeascorpus` sur le disque dur.
@@ -33,6 +38,8 @@ L'option `--stopwords=stopwords_file` permet d'ignorer certains mots.
 
 On obtient ainsi dans le dossier `data` le fichier dictionnaire `corpus_wordids.txt` qui associe un id à chaque mot du corpus, et le fichier `corpus_bow.mm`, représentation bag-of-words du corpus.
 
+_temps indicatif: 15s (fichier de 1000 articles)_
+
 ## Algorithmes
 
 On peut ensuite appliquer divers algorithmes:
@@ -40,26 +47,35 @@ On peut ensuite appliquer divers algorithmes:
 ### TFIDF
 
 ```
-python $habeascorpus/scripts/tfidf.py corpus_name -v
+python $habeascorpus/scripts/tfidf.py $corpus -v
 ```
 
 (`corpus_name` est le nom du fichier contenant les articles sans l'extension `.tsv`)
 
 L'option `--saveindex` permet de sauvegarder un fichier d'index (utile pour la recherche de doublons, traductions,...)
 
+_temps indicatif: 7s_
+
 ### LDA
 ```
-python $habeascorpus/scripts/lda.py corpus_name nb_topics -v
+nb_topics=100
+python $habeascorpus/scripts/lda.py $corpus $nb_topics -v
 ```
 
 L'option `--saveindex` permet de sauvegarder un fichier d'index (utile pour la recherche de contenu similaire)
+
+
+_temps indicatif: 65s_
 
 ### LSI
 ```
-python $habeascorpus/scripts/lsi.py corpus_name nb_topics -v
+nb_topics=100
+python $habeascorpus/scripts/lsi.py $corpus $nb_topics -v
 ```
 
 L'option `--saveindex` permet de sauvegarder un fichier d'index (utile pour la recherche de contenu similaire)
+
+_temps indicatif: 8s_
 
 ## Trucs cools à faire
 
@@ -76,7 +92,7 @@ python $habeascorpus/scripts/translate_corpus.py corpus_fr corpus_etranger.tsv o
 Pour détecter les doublons dans un corpus :
 
 ```
-python $habeascorpus/scripts/find_doublons.py corpus_name -v
+python $habeascorpus/scripts/find_doublons.py $corpus -v
 ```
 
 ### Contenu similaire
@@ -84,7 +100,8 @@ python $habeascorpus/scripts/find_doublons.py corpus_name -v
 Pour trouver les articles similaires à `article.txt` dans un corpus :
 
 ```
-cat article.txt | python $habeascorpus/scripts/similar_articles.py corpus_name method -v
+method=tfidf
+cat article.txt | python $habeascorpus/scripts/similar_articles.py $corpus $method -v
 ```
 
 Avec `method` : `tfidf`, `lda100`, `lda50`, `lsi100`,... 
