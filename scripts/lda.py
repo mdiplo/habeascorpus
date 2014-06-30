@@ -69,6 +69,6 @@ if args.saveindex:
 
 # L'option --savetopics enregistre dans un fichier les topics trouvés par l'algorithme
 if args.savetopics:
-    with open(args.corpus_name + '_topics.txt', 'w') as f:
+    with open(args.corpus_name + '_lda' + str(args.nb_topics) + '_topics.txt', 'w') as f:
         topics = [[{'word': x[1], 'weight_in_topic': x[0]} for x in lda.show_topic(i)] for i in range(args.nb_topics)]
         f.write(json.dumps(topics))
