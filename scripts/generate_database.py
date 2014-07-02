@@ -10,105 +10,72 @@ import os.path
 import sys
 import logging
 from gensim import corpora, similarities
-
-root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-sys.path.append(root_dir)  #TODO : faire fonctionner les import relatif (from .. import utils)
-entities_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'entities')
-sys.path.append(entities_dir)
-
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 import utils
-from api.models import Topic, Document 
 
-def add_topics(topics_file, session):
-    """
-    Ajoute les topics dans la table topics à partir du fichier topics.txt généré
-    par lda.py
-    
-    :Parameters:
-        -`topics_file`: Le fichier topics.txt contenant les topics
-        
-    """
-
-    with open(topics_file, 'r') as inp:
-        for i, line in enumerate(inp):
-            Topic.create(related_words = line)
-
-def add_documents(raw_corpus_file, lda_corpus_file, topics, session):
-    """
-    Ajoute dans la table documents les articles d'un fichier .tsv contenant 8 colonnes :
-        - id_article
-        - titre
-        - chapo
-        - texte
-        - langue
-        - auteur
-        - mots
-        - date
-        
-    Ajoute également les topics liés à chaque document.
-        
-    :Parameters:
-        -`raw_corpus_file`: Le fichier .tsv contenant les documents
-        -`lda_corpus_file`: Le fichier _lda.mm 
-        -`topics` : Une liste l contenant tous les topics telle que l[i] = Topic(id = i)
-        -`session`: L'objet Session de sqlalchemy'
-
-    """
-    try:
-        lda = corpora.mmcorpus.MmCorpus(lda_corpus_file)
-    except:
-        raise IOError("""Impossible de trouver le fichier _lda.mm
-        dans le dossier %s""" % (os.getcwd()))
-
-    with open(raw_corpus_file, 'r') as raw:
-        raw.readline()  # on ignore la première ligne qui contient les noms des colonnes
-        for docno, raw_line in enumerate(raw):
-            # lda[docno] donne les topics associés au document raw_line sous la forme
-            # d'une liste de tuples (id_topic, poids du topic id_topic dans le document docno)  
-
-            doc = Document(raw_line.rstrip().split('\t'))
-            for id_topic, weight_in_document in lda[docno]:
-                doc_topic = DocumentTopic(weight_in_document=weight_in_document)
-                doc_topic.topic = topics[id_topic]
-                doc.topics.append(doc_topic)
-            session.add(doc)
-
-            if docno % 500 == 0:
-                session.commit()
-
-        session.commit()
-        
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="""Génère la base de données sqlite 
-    d'exploration d'un corpus.""");
-    parser.add_argument('-v', '--verbose', action='store_true',
+# Les arguments à fournir en ligne de commande
+parser = argparse.ArgumentParser(description="""Génère la base de données sqlite nécessaire pour explorer le corpus.""")
+parser.add_argument('corpus_name', type=str,
+                    help="Le nom du corpus (i.e le nom du fichier sans l'extension .tsv)")
+parser.add_argument('-v', '--verbose', action='store_true',
                     help="Afficher les messages d'information")
-    args = parser.parse_args()
+args = parser.parse_args()
+
+corpus_file = args.corpus_name + '.tsv'
+
+engine = create_engine('sqlite:///%s.db' % (args.corpus_name), echo=True)
+Session = sessionmaker(bind=engine)
+session = Session()
+
+Base = declarative_base()
+
+class Topic(Base):
+
+    __tablename__ = 'topics'
     
-    if args.verbose:
-        logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+    id = Column(Integer, primary_key=True)
+    related_words = Column(String)
+    #weight_in_corpus = Column(Float)
     
-    tsv_corpus = glob.glob('*.tsv')
-    lda_corpus = glob.glob('*_lda.mm')
-    topics = glob.glob('*_topics.txt')
+class Article(Base):
+
+    __tablename__ = 'articles'
     
-    if not tsv_corpus:
-        raise IOError("""Impossible de trouver le fichier .tsv
-        dans le dossier %s""" % (os.getcwd()))
-    if not lda_corpus:
-        raise IOError("""Impossible de trouver le fichier _lda.mm
-        dans le dossier %s""" % (os.getcwd()))
-    if not topics:
-        raise IOError("""Impossible de trouver le fichier topics.txt 
-        dans le dossier %s""" % (os.getcwd()))
+    id = Column(Integer, primary_key=True)
+    
+    def __init__(self, raw_line):
+        id, title, chapo, text, lang, authors, keywords, date = raw_line.rstrip('\n').split('\t') 
+        self.id = id
+    
+Base.metadata.create_all(engine)
+
+# Ajout des articles
+with open(args.corpus_name + '.tsv') as f:
+    
+    f.readline()  # on passe la première ligne qui contient l'entête
+    
+    for i, raw_line in enumerate(f):
+        doc = Article(raw_line)
+        session.add(doc)
         
-    corpus_name = os.path.splitext(tsv_corpus[0])[0]
+        if i% 10 == 0 and args.verbose:
+            print "Ajout de l'article n° %d" % (i)
+        
+        if i % 1000 == 0:
+            session.commit()
+
+# Ajout des topics
+# On créé une table pour chaque modèle de topics (lda50, lda100,...)
+
+def add_topics(model_file, session):
+    topics_file = model_file.rstrip('_model') + '_topics'
     
-    #On ajoute les topics à la base, et on les récupère dans la variable topics
-    add_topics(topics[0])
-    
-    #add_documents(tsv_corpus[0], lda_corpus[0], topics, session)
-    #
-    ##On calcule pour chaque topic son poids total dans le corpus
-    #for topic in topics:
-    #    topic.set_weight_in_corpus(session)
+    with open(topics_file) as f:
+        topics = eval(f.read())
+        session.add_all([Topic(related_words = str(topic)) for topic in topics])
+    session.commit()
+
+for method in glob.glob('*lda[0-9]*_model')
