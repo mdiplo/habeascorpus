@@ -67,3 +67,4 @@ with open(input_file['path']) as f:
     for raw_line in f:
         doc = utils.Document(raw_line)
         o.write(doc.id + '\t' + doc.title + '\n')
+    o.close()
