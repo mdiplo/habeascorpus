@@ -18,6 +18,8 @@ import utils
 parser = argparse.ArgumentParser(description="""Ce script prend un corpus en entrée et génère la matrice de similarité pour ce corpus.""")
 parser.add_argument('corpus_name', type=str, help='Le nom du corpus')
 parser.add_argument('method', type=str, help="La méthode utilisée (lda, lsi, tfidf)")
+parser.add_argument('--nb_neighbours', type=int, default=5,
+    help="Le nombre de voisins à déterminer pour chaque article")
 parser.add_argument('-v', '--verbose', action='store_true',
         help="Afficher les messages d'information")
 args = parser.parse_args()
@@ -47,13 +49,13 @@ with open(args.corpus_name + '_' + args.method + '_similarity_matrix.csv', 'w') 
     for i, document in enumerate(corpus):
     
         # Pour chaque article d, on trie les autres articles par proximité décroissante
-        # avec d, et on écrit dans un fichier l'id et le score de proximité pour les 5
+        # avec d, et on écrit dans un fichier l'id et le score de proximité pour les args.nb_neighbours
         # plus proches
         sims = index[document]
         sims = sorted(enumerate(sims), key=lambda item: -item[1])
         
         o.write(str(utils.get_article_by_corpus_number(i, docid_file)) + '\t')
-        o.write('\t'.join([str((utils.get_article_by_corpus_number(x[0], docid_file), x[1])) for x in sims[1:6]]))
+        o.write('\t'.join([str((utils.get_article_by_corpus_number(x[0], docid_file), x[1])) for x in sims[1:args.nb_neighbours + 1]]))
         o.write('\n')
         
         if args.verbose:
