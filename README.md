@@ -29,7 +29,7 @@ habeascorpus=`/chemin/vers/habeascorpus`
 La première étape est le calcul de la représentation bag-of-words du corpus :
 
 ```
-python $habeascorpus/scripts/corpus_to_matrix.py $corpus.tsv -v
+python $habeascorpus/scripts/corpus_to_matrix.py $corpus -v
 ```
 
 où `$habeascorpus` est le chemin de `habeascorpus` sur le disque dur.
@@ -84,7 +84,7 @@ _temps indicatif: 8s_
 Pour associer les articles d'un `corpus_etranger` à leur traduction dans `corpus_fr` :
 
 ```
-python $habeascorpus/scripts/translate_corpus.py corpus_fr corpus_etranger.tsv output_name -v
+python $habeascorpus/scripts/translate_corpus.py corpus_fr corpus_etranger output_name -v
 ```
 
 ### Doublons

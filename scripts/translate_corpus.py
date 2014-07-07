@@ -63,6 +63,7 @@ if __name__ == '__main__':
     index_file = args.corpus_fr + '_tfidf_index'
     dic_path = args.corpus_fr + '_wordids.txt'
     corpus_path = args.corpus_fr + '_tfidf.mm'
+    corpus_etranger = args.corpus_etranger + '.tsv'
     tfidfmodel_path = args.corpus_fr + '_tfidf_model'
     
     # Chargement du corpus  
@@ -89,7 +90,7 @@ if __name__ == '__main__':
     except Exception:
         raise IOError("""Impossible de charger le fichier %s. Avez-vous bien appliqué le script tfidf ?""" % (tfidfmodel_path))
         
-    f = open(args.corpus_etranger)
+    f = open(corpus_etranger)
     o = open(args.translate_file, 'w')
         
     for i, l in enumerate(f):
