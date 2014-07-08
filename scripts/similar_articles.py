@@ -10,6 +10,7 @@ dans une base donnée.
 import argparse
 import logging
 import sys
+import json
 from gensim import corpora, similarities, models
 
 import utils
@@ -84,7 +85,7 @@ def find_similar_articles(corpus_name, method, id=None, content=None):
     # Renvoi des 5 articles les plus proches 
     sims = index[tokens]   
     sims = sorted(enumerate(sims), key=lambda item: -item[1])
-    return [(utils.get_article_by_corpus_number(x[0], docid_file), x[1]) for x in sims[:5]]
+    return json.dumps([{'id': utils.get_article_by_corpus_number(x[0], docid_file), 'score': round(x[1], 2)} for x in sims[:5]])
 
 if __name__ == '__main__':
 
@@ -107,6 +108,5 @@ if __name__ == '__main__':
     # Si aucun id n'est fourni, le script assume que le contenu est l'entrée standard
     else:
         content = unicode(sys.stdin.read(), 'utf8')
-        print content
         print find_similar_articles(args.corpus_name, args.method, content=content)
 
