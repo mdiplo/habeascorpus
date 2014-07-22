@@ -43,9 +43,6 @@ STATICFILES_DIRS = (
 INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'api',
-    'django_browser',
 )
 
 MIDDLEWARE_CLASSES = (
