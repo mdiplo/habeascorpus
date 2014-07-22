@@ -63,6 +63,8 @@ def find_similar_articles(corpus_name, method, content, data_dir=os.getcwd(), in
             id2word = corpora.dictionary.Dictionary.load_from_text(dico_file)
         except Exception:
             raise IOError("Impossible de charger le fichier %s" % (dico_file))
+            
+        print "Après chargement du dictionnaire %f" %(time.clock())
 
     # Chargement du modèle correspondant à la méthode voulue par l'utilisateur
     if not model:
@@ -77,12 +79,16 @@ def find_similar_articles(corpus_name, method, content, data_dir=os.getcwd(), in
         elif method.startswith('lda'):
             model_file = os.path.join(data_dir, corpus_name + '_' + args.method + '_model')
             model = models.ldamodel.LdaModel.load(model_file)
+            
+        print "Après chargement du modèle %f" %(time.clock())
 
     tokens = model[id2word.doc2bow(utils.tokenize(content))]
 
     # Renvoi des 5 articles les plus proches 
-    sims = index[tokens]   
+    sims = index[tokens]
+    print "Après sims= %f" %(time.clock())
     sims = sorted(enumerate(sims), key=lambda item: -item[1])
+    print "Après le tri %f" %(time.clock())
     return json.dumps([{'id': utils.get_article_by_corpus_number(x[0], docid_file), 'score': round(x[1], 2)} for x in sims[:5]])
 
 if __name__ == '__main__':
