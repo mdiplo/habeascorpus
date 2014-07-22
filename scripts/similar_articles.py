@@ -12,11 +12,12 @@ import os
 import logging
 import sys
 import json
+import time
 from gensim import corpora, similarities, models
 
 import utils
 
-def find_similar_articles(corpus_name, method, content, data_dir=os.getcwd(), index=None):
+def find_similar_articles(corpus_name, method, content, data_dir=os.getcwd(), index=None, id2word=None, corpus=None, model=None):
 
     """
     - corpus_name : Le nom du corpus sur lequel on travaille (fichier .tsv 
@@ -29,16 +30,21 @@ def find_similar_articles(corpus_name, method, content, data_dir=os.getcwd(), in
     Renvoie les 5 articles de corpus_name les plus proches du contenu spécifié 
     
     """
-
+    
+    print "Début %f" %(time.clock())
+    
     corpus_file = os.path.join(data_dir, corpus_name + '_' + method + '.mm')
     index_file = os.path.join(data_dir, corpus_name + '_' + method + '_index')
     docid_file = os.path.join(data_dir, corpus_name + '_docid.txt')
     
     # Chargement du corpus
-    try:
-        corpus = corpora.mmcorpus.MmCorpus(corpus_file)
-    except Exception:
-        raise IOError('Impossible de charger le fichier %s. Avez-vous bien appliqué le script corpus_to_matrix.py ?' % (corpus_file))
+    if not corpus:
+        try:
+            corpus = corpora.mmcorpus.MmCorpus(corpus_file)
+        except Exception:
+            raise IOError('Impossible de charger le fichier %s. Avez-vous bien appliqué le script corpus_to_matrix.py ?' % (corpus_file))
+            
+        print "Après chargement du corpus %f" %(time.clock())
 
     # Chargement du fichier d'index, s'il n'est pas fourni en argument
     if not index:
@@ -46,27 +52,31 @@ def find_similar_articles(corpus_name, method, content, data_dir=os.getcwd(), in
             index = similarities.docsim.Similarity.load(index_file)
         except Exception:
             raise IOError("""Impossible de charger le fichier %s. Avez-vous bien appliqué le script %s avec l'option --saveindex ?""" % (method, index_file))
+            
+        print "Après chargement du fichier d'index %f" %(time.clock())   
 
     dico_file = os.path.join(data_dir, corpus_name + '_wordids.txt')
 
     # Chargement du dictionnaire
-    try:
-        id2word = corpora.dictionary.Dictionary.load_from_text(dico_file)
-    except Exception:
-        raise IOError("Impossible de charger le fichier %s" % (dico_file))
+    if not id2word:
+        try:
+            id2word = corpora.dictionary.Dictionary.load_from_text(dico_file)
+        except Exception:
+            raise IOError("Impossible de charger le fichier %s" % (dico_file))
 
     # Chargement du modèle correspondant à la méthode voulue par l'utilisateur
-    if method == 'tfidf':
-        model_file = os.path.join(data_dir, corpus_name + '_tfidf_model')
-        model = models.tfidfmodel.TfidfModel.load(model_file)
+    if not model:
+        if method == 'tfidf':
+            model_file = os.path.join(data_dir, corpus_name + '_tfidf_model')
+            model = models.tfidfmodel.TfidfModel.load(model_file)
 
-    elif method.startswith('lsi'):
-        model_file = os.path.join(data_dir, corpus_name + '_' + args.method + '_model')
-        model = models.lsimodel.LsiModel.load(model_file)
+        elif method.startswith('lsi'):
+            model_file = os.path.join(data_dir, corpus_name + '_' + args.method + '_model')
+            model = models.lsimodel.LsiModel.load(model_file)
 
-    elif method.startswith('lda'):
-        model_file = os.path.join(data_dir, corpus_name + '_' + args.method + '_model')
-        model = models.ldamodel.LdaModel.load(model_file)
+        elif method.startswith('lda'):
+            model_file = os.path.join(data_dir, corpus_name + '_' + args.method + '_model')
+            model = models.ldamodel.LdaModel.load(model_file)
 
     tokens = model[id2word.doc2bow(utils.tokenize(content))]
 
