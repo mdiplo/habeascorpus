@@ -31,7 +31,8 @@ def find_similar_articles(corpus_name, method, content, data_dir=os.getcwd(), in
     
     """
     
-    print "Début %f" %(time.clock())
+    debut = time.clock()
+    print "Début %f" %(debut)
     
     corpus_file = os.path.join(data_dir, corpus_name + '_' + method + '.mm')
     index_file = os.path.join(data_dir, corpus_name + '_' + method + '_index')
@@ -89,6 +90,10 @@ def find_similar_articles(corpus_name, method, content, data_dir=os.getcwd(), in
     print "Après sims= %f" %(time.clock())
     sims = sorted(enumerate(sims), key=lambda item: -item[1])
     print "Après le tri %f" %(time.clock())
+    
+    fin = time.clock()
+    print "Temps d'éxécution total %f" %(fin - debut)
+    
     return json.dumps([{'id': utils.get_article_by_corpus_number(x[0], docid_file), 'score': round(x[1], 2)} for x in sims[:5]])
 
 if __name__ == '__main__':
