@@ -94,7 +94,7 @@ def find_similar_articles(corpus_name, method, content, data_dir=os.getcwd(), in
     fin = time.clock()
     print "Temps d'éxécution total %f" %(fin - debut)
     
-    return json.dumps([{'id': utils.get_article_by_corpus_number(x[0], docid_file), 'score': round(x[1], 2)} for x in sims[:5]])
+    return [{'id': utils.get_article_by_corpus_number(x[0], docid_file), 'score': round(x[1], 2)} for x in sims[:5]]
 
 if __name__ == '__main__':
 
