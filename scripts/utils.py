@@ -7,7 +7,7 @@ Des fonctions régulièrement utilisées dans les autres fichiers
 """
 
 import os
-import nltk
+#import nltk
 import re
 
 
