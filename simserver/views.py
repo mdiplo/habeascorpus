@@ -13,15 +13,12 @@ sys.path.append(os.path.join(root_path, 'scripts'))
 
 import similar_articles
 import utils
+from habeascorpus import settings
 
-data_path = os.path.join(os.path.join(root_path, 'data'), 'diplo_juillet2')
-corpus_name = 'articles_fr'
-method = 'tfidf'
-
-tsv_file = os.path.join(data_path, corpus_name + '.tsv')
-corpus_file = os.path.join(data_path, corpus_name + '_' + method + '.mm')
-index_file = os.path.join(data_path, corpus_name + '_' + method + '_index')
-dico_file = os.path.join(data_path, corpus_name + '_wordids.txt')
+tsv_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '.tsv')
+corpus_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_' + settings.METHOD + '.mm')
+index_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_' + settings.METHOD + '_index')
+dico_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_wordids.txt')
 
 try:
     corpus = corpora.mmcorpus.MmCorpus(corpus_file)
@@ -32,23 +29,23 @@ try:
     index = similarities.docsim.Similarity.load(index_file)
     print index_file
 except Exception:
-    raise IOError("""Impossible de charger le fichier %s. Avez-vous bien appliqué le script %s avec l'option --saveindex ?""" % (method, index_file))
+    raise IOError("""Impossible de charger le fichier %s. Avez-vous bien appliqué le script %s avec l'option --saveindex ?""" % (settings.METHOD, index_file))
 
 try:
     id2word = corpora.dictionary.Dictionary.load_from_text(dico_file)
 except Exception:
     raise IOError("Impossible de charger le fichier %s" % (dico_file))
     
-if method == 'tfidf':
-    model_file = os.path.join(data_path, corpus_name + '_tfidf_model')
+if settings.METHOD == 'tfidf':
+    model_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_tfidf_model')
     model = models.tfidfmodel.TfidfModel.load(model_file)
 
-elif method.startswith('lsi'):
-    model_file = os.path.join(data_path, corpus_name + '_' + method + '_model')
+elif settings.METHOD.startswith('lsi'):
+    model_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_' + settings.METHOD + '_model')
     model = models.lsimodel.LsiModel.load(model_file)
 
-elif method.startswith('lda'):
-    model_file = os.path.join(data_path, corpus_name + '_' + method + '_model')
+elif settings.METHOD.startswith('lda'):
+    model_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_' + settings.METHOD + '_model')
     model = models.ldamodel.LdaModel.load(model_file)
     
 # Construction d'un tableau contenant pour chaque article son titre, l'auteur, les mots-clefs
@@ -60,7 +57,7 @@ with open(tsv_file) as f:
 
 @csrf_exempt
 def diploisation(request):
-    neighbours = similar_articles.find_similar_articles(corpus_name, method, content=request.POST['texte'], data_dir=data_path, index=index, id2word=id2word, corpus=corpus, model=model)
+    neighbours = similar_articles.find_similar_articles(settings.CORPUS_NAME, settings.METHOD, content=request.POST['texte'], data_dir=settings.DATA_DIR, index=index, id2word=id2word, corpus=corpus, model=model)
     
     result = []
     for article in neighbours:
