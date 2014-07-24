@@ -83,4 +83,5 @@ USE_TZ = True
 CORPUS_NAME = 'articles_fr'
 METHOD = 'tfidf'
 DATA_DIR = os.path.join(BASE_DIR, 'data/diplo_juillet2/')
+MAX_ARTICLES = 20
 

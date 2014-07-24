@@ -57,7 +57,16 @@ with open(tsv_file) as f:
 
 @csrf_exempt
 def diploisation(request):
-    neighbours = similar_articles.find_similar_articles(settings.CORPUS_NAME, settings.METHOD, content=request.POST['texte'], data_dir=settings.DATA_DIR, index=index, id2word=id2word, corpus=corpus, model=model)
+    
+    #nb d'articles proches voulu
+    if request.POST.has_key('nb_articles'):
+        if int(request.POST['nb_articles']) < 0:
+            raise ValueError("Le nombre d'articles proches doit être > 0")
+        nb_articles = min(int(request.POST['nb_articles']), settings.MAX_ARTICLES)
+    else:
+        nb_articles = 5
+        
+    neighbours = similar_articles.find_similar_articles(settings.CORPUS_NAME, settings.METHOD, n=nb_articles, content=request.POST['texte'], data_dir=settings.DATA_DIR, index=index, id2word=id2word, corpus=corpus, model=model)
     
     result = []
     for article in neighbours:

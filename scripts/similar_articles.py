@@ -17,7 +17,7 @@ from gensim import corpora, similarities, models
 
 import utils
 
-def find_similar_articles(corpus_name, method, content, data_dir=os.getcwd(), index=None, id2word=None, corpus=None, model=None):
+def find_similar_articles(corpus_name, method, content, n=5, data_dir=os.getcwd(), index=None, id2word=None, corpus=None, model=None):
 
     """
     - corpus_name : Le nom du corpus sur lequel on travaille (fichier .tsv 
@@ -27,7 +27,9 @@ def find_similar_articles(corpus_name, method, content, data_dir=os.getcwd(), in
     
     - content : un texte
     
-    Renvoie les 5 articles de corpus_name les plus proches du contenu spécifié 
+    - n: le nombre d'articles proches voulus
+    
+    Renvoie les n articles de corpus_name les plus proches du contenu spécifié 
     
     """
     
@@ -94,7 +96,7 @@ def find_similar_articles(corpus_name, method, content, data_dir=os.getcwd(), in
     fin = time.clock()
     print "Temps d'éxécution total %f" %(fin - debut)
     
-    return [{'id': utils.get_article_by_corpus_number(x[0], docid_file), 'score': round(x[1], 2)} for x in sims[:5]]
+    return [{'id': utils.get_article_by_corpus_number(x[0], docid_file), 'score': round(x[1], 2)} for x in sims[:n]]  # faut-il vérifier que sims[:n] est licite ?
 
 if __name__ == '__main__':
 
