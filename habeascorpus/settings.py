@@ -25,11 +25,11 @@ DATA_DIR = os.getcwd()
 SECRET_KEY = '$7zi5j4_+^mx(r2zoi*5+$m(#jx$x@nr+9$vltvwb*%6$h$(2k'
 
 # SECURITY WARNING: don't run with  debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-TEMPLATE_DEBUG = True
+TEMPLATE_DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 STATIC_URL = '/static/'
 
@@ -80,8 +80,8 @@ USE_L10N = True
 USE_TZ = True
 
 # Corpus
-CORPUS_NAME = 'articles_fr'
+CORPUS_NAME = 'articles-fr'
 METHOD = 'tfidf'
-DATA_DIR = os.path.join(BASE_DIR, 'data/diplo_juillet2/')
+DATA_DIR = os.path.join(BASE_DIR, 'data')
 MAX_ARTICLES = 20
 

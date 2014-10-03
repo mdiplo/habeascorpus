@@ -71,4 +71,5 @@ def diploisation(request):
     result = []
     for article in neighbours:
         result.append(dict(metadonnees[str(article['id'])].items() + article.items()))
+    print request.POST['texte'], result
     return HttpResponse(json.dumps(result))
