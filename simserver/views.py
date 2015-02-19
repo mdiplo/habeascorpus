@@ -53,7 +53,7 @@ metadonnees = {}
 with open(tsv_file) as f:
     for l in f:
         doc = utils.Document(l)
-        metadonnees[doc.id] = {'titre' : doc.title, 'auteurs': doc.authors, 'date': doc.date, 'mots': list(doc.keywords) }
+        metadonnees[doc.id] = {'titre' : doc.title, 'auteurs': doc.authors, 'date': doc.date, 'mots': list(doc.keywords), 'url_site': doc.url_site }
 
 @csrf_exempt
 def diploisation(request):
