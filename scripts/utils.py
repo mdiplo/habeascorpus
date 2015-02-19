@@ -16,7 +16,7 @@ class Document:
     """Une classe qui représente un document """
 
     def __init__(self, raw_document):
-        id, title, chapo, text, lang, authors, keywords, date = raw_document.rstrip('\n').split('\t')
+        id, title, chapo, text, lang, authors, keywords, date, url_site = raw_document.rstrip('\n').split('\t')
 
         self.id = id
         self.title = title
@@ -29,6 +29,7 @@ class Document:
         self.authors = authors.split(', ')
         self.keywords = set(keywords.split(', '))
         self.date = date
+        self.url_site = url_site
 
     def __str__(self):
         id = self.id
@@ -39,8 +40,9 @@ class Document:
         authors = ', '.join(self.authors)
         keywords = ', '.join(self.keywords)
         date = self.date
+        url_site = self.url_site
 
-        return '\t'.join([id, title, chapo, text, lang, authors, keywords, date]) + '\n'
+        return '\t'.join([id, title, chapo, text, lang, authors, keywords, date, url_site]) + '\n'
 
     def get_tokens(self, stopwords):
     
