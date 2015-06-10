@@ -57,7 +57,11 @@ with open(tsv_file) as f:
 
 @csrf_exempt
 def diploisation(request):
-    
+
+    # rien poste: home page
+    if request.method == 'GET':
+        return HttpResponse(homepage())
+
     #nb d'articles proches voulu
     if request.POST.has_key('nb_articles'):
         if int(request.POST['nb_articles']) < 0:
@@ -73,3 +77,10 @@ def diploisation(request):
         result.append(dict(metadonnees[str(article['id'])].items() + article.items()))
     print request.POST['texte'], result
     return HttpResponse(json.dumps(result))
+
+
+def homepage():
+    return u'Bookmarklet: <a href="javascript:var%20titre=document.title;var%20txt=\'\';if(window.getSelection){txt=window.getSelection();}else%20if(document.getSelection){txt=document.getSelection();}else%20if(document.selection){txt=document.selection.createRange().text;}var%20url=document.location;void(btw=window.open(\'http://archives.mondediplo.com?page=diploiser#titre=\'+(encodeURIComponent(titre))+encodeURI(\'\\r\')+escape(url)+encodeURI(\'\\r\\r\')+\'&texte=\'+(encodeURIComponent(txt))))">+diploiser</a>'
+
+
+
