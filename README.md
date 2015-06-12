@@ -39,6 +39,7 @@ L'option `--stopwords=stopwords_file` permet d'ignorer certains mots.
 On obtient ainsi dans le dossier `data` le fichier dictionnaire `corpus_wordids.txt` qui associe un id à chaque mot du corpus, et le fichier `corpus_bow.mm`, représentation bag-of-words du corpus.
 
 _temps indicatif: 15s (fichier de 1000 articles)_
+_t.i. 2: 9m23s (articlesfr, 21000 articles)_
 
 ## Algorithmes
 
@@ -55,6 +56,7 @@ python $habeascorpus/scripts/tfidf.py $corpus -v
 L'option `--saveindex` permet de sauvegarder un fichier d'index (utile pour la recherche de doublons, traductions,...)
 
 _temps indicatif: 7s_
+_t.i. 2: 9m23s (articlesfr, 21000 articles)_
 
 ### LDA
 ```
