@@ -152,5 +152,43 @@ On accède à l'API en entrant l'url http://127.0.0.1:8000/api/ dans un navigate
 Pour visualiser les données dans un navigateur web, démarrer l'API et accéder à l'URL `http://127.0.0.1:8000/static/index.html`
 
 
+## Dépendances
+`numpy`? ; `nltk` ; `scipy`
 
+```
+sudo apt-get install python-numpy python-scipy
+sudo easy_install six
+```
 
+et bien sûr `gensim`:
+```
+pip install gensim
+```
+
+## Installation du simserver (en dev)
+
+Bien configuré dans `habeascorpus/settings.py`
+
+On le lance alors avec
+```
+python manage.py runserver
+```
+
+ce qui affiche: `Development server is running at http://127.0.0.1:8000/`
+
+Un proxy permet de publier les résultats sur notre URL de référence :
+dans `.htaccess`
+```
+RewriteRule ^simserver/ http://127.0.0.1:8000/simserver/ [P]   
+```
+
+Il faudra éventuellement activer le module `proxy_http` d’`apache`
+```
+sudo a2enmod proxy_http
+```
+
+***
+Pour ne pas avoir 1s de délai quand on envoie, il faut supprimer l’entête Expect:
+` curl -H "Expect;" --data-urlencode texte@text.txt http://127.0.0.1:8000/simserver/ `
+
+http://stackoverflow.com/questions/8717387/request-always-takes-atleast-1-second-when-timeout-2
