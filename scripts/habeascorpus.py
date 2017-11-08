@@ -30,6 +30,7 @@ class HabeasCorpus(corpora.TextCorpus):
                 try:
                     document = utils.Document(raw_line)
                 except Exception:
+                    print (utils.textimport(raw_line).rstrip('\n').split('\t'))
                     raise ValueError("La ligne n°%d n'est pas au bon format" % (i+1))
                 yield document.get_tokens(self.stopwords)
 

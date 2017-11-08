@@ -12,7 +12,7 @@ import re
 
 def textimport(text):
     if sys.version_info[0] == 2:
-        text = unicode(text, 'utf-8')
+        return unicode(text, 'utf8')
     return str(text)
 
 class Document:
