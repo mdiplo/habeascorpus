@@ -22,9 +22,9 @@ class Document:
         self.title = title
         self.chapo = unicode(chapo, 'utf8')
         text = unicode(text, 'utf8')
-	text = re.sub('\\\\n', '', text)
-	text = re.sub('\\n', '', text)
-	self.text = text 
+        text = re.sub('\\\\n', '', text)
+        text = re.sub('\\n', '', text)
+        self.text = text 
         self.lang = lang
         self.authors = authors.split(', ')
         self.keywords = set(keywords.split(', '))
