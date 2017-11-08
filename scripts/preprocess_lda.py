@@ -32,7 +32,7 @@ else:
     stopwords = []
 
 stopwords.extend(nltk.corpus.stopwords.words('french'))
-stopwords = set([unicode(x, 'utf8') for x in stopwords])
+stopwords = set([utils.textimport(x) for x in stopwords])
 
 with open(args.corpus_file) as f:
     tokens = []

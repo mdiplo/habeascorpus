@@ -34,7 +34,7 @@ def find_similar_articles(corpus_name, method, content, n=5, data_dir=os.getcwd(
     """
     
     debut = time.clock()
-    print "Début %f" %(debut)
+    print ("Début %f" %(debut))
     
     corpus_file = os.path.join(data_dir, corpus_name + '_' + method + '.mm')
     index_file = os.path.join(data_dir, corpus_name + '_' + method + '_index')
@@ -47,7 +47,7 @@ def find_similar_articles(corpus_name, method, content, n=5, data_dir=os.getcwd(
         except Exception:
             raise IOError('Impossible de charger le fichier %s. Avez-vous bien appliqué le script corpus_to_matrix.py ?' % (corpus_file))
             
-        print "Après chargement du corpus %f" %(time.clock())
+        print ("Après chargement du corpus %f" %(time.clock()))
 
     # Chargement du fichier d'index, s'il n'est pas fourni en argument
     if not index:
@@ -56,7 +56,7 @@ def find_similar_articles(corpus_name, method, content, n=5, data_dir=os.getcwd(
         except Exception:
             raise IOError("""Impossible de charger le fichier %s. Avez-vous bien appliqué le script %s avec l'option --saveindex ?""" % (method, index_file))
             
-        print "Après chargement du fichier d'index %f" %(time.clock())   
+        print ("Après chargement du fichier d'index %f" %(time.clock()))
 
     dico_file = os.path.join(data_dir, corpus_name + '_wordids.txt')
 
@@ -67,7 +67,7 @@ def find_similar_articles(corpus_name, method, content, n=5, data_dir=os.getcwd(
         except Exception:
             raise IOError("Impossible de charger le fichier %s" % (dico_file))
             
-        print "Après chargement du dictionnaire %f" %(time.clock())
+        print ("Après chargement du dictionnaire %f" %(time.clock()))
 
     # Chargement du modèle correspondant à la méthode voulue par l'utilisateur
     if not model:
@@ -83,18 +83,18 @@ def find_similar_articles(corpus_name, method, content, n=5, data_dir=os.getcwd(
             model_file = os.path.join(data_dir, corpus_name + '_' + args.method + '_model')
             model = models.ldamodel.LdaModel.load(model_file)
             
-        print "Après chargement du modèle %f" %(time.clock())
+        print ("Après chargement du modèle %f" %(time.clock()))
 
     tokens = model[id2word.doc2bow(utils.tokenize(content))]
 
     # Renvoi des 5 articles les plus proches 
     sims = index[tokens]
-    print "Après sims= %f" %(time.clock())
+    print ("Après sims= %f" %(time.clock()))
     sims = sorted(enumerate(sims), key=lambda item: -item[1])
-    print "Après le tri %f" %(time.clock())
+    print ("Après le tri %f" %(time.clock()))
     
     fin = time.clock()
-    print "Temps d'éxécution total %f" %(fin - debut)
+    print ("Temps d'éxécution total %f" %(fin - debut))
     
     return [{'id': utils.get_article_by_corpus_number(x[0], docid_file), 'score': round(x[1], 2)} for x in sims[:n]]  # faut-il vérifier que sims[:n] est licite ?
 
@@ -112,6 +112,6 @@ if __name__ == '__main__':
     if args.verbose:
         logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
         
-    content = unicode(sys.stdin.read(), 'utf8')
-    print find_similar_articles(args.corpus_name, args.method, content=content)
+    content = utils.textimport(sys.stdin.read())
+    print (find_similar_articles(args.corpus_name, args.method, content=content))
 

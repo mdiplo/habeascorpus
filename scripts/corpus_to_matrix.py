@@ -38,7 +38,7 @@ corpus_file = args.corpus + '.tsv'
 
 # L'option -v affiche les messages d'information
 if args.verbose:
-    logging.basicConfig(asctime='%(s)levelname : %(format)s : %(message)s', level=logging.INFO)
+    logging.basicConfig(format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s', level=logging.INFO)
 
 if (os.path.isfile(args.corpus + '_bow.mm')):
     raise IOError("Le corpus existe déjà sous forme matricielle")

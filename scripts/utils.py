@@ -6,10 +6,14 @@ Des fonctions régulièrement utilisées dans les autres fichiers
 
 """
 
-import os
+import os, sys
 #import nltk
 import re
 
+def textimport(text):
+    if sys.version_info[0] == 2:
+        text = unicode(text, 'utf-8')
+    return str(text)
 
 class Document:
 
@@ -20,8 +24,8 @@ class Document:
 
         self.id = id
         self.title = title
-        self.chapo = unicode(chapo, 'utf8')
-        text = unicode(text, 'utf8')
+        self.chapo = textimport(chapo)
+        text = textimport(text)
         text = re.sub('\\\\n', '', text)
         text = re.sub('\\n', '', text)
         self.text = text 
