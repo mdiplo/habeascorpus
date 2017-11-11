@@ -27,7 +27,7 @@ except Exception:
             
 try:
     index = similarities.docsim.Similarity.load(index_file)
-    print index_file
+    print (index_file)
 except Exception:
     raise IOError("""Impossible de charger le fichier %s. Avez-vous bien appliqué le script %s avec l'option --saveindex ?""" % (settings.METHOD, index_file))
 
@@ -35,7 +35,7 @@ try:
     id2word = corpora.dictionary.Dictionary.load_from_text(dico_file)
 except Exception:
     raise IOError("Impossible de charger le fichier %s" % (dico_file))
-    
+
 if settings.METHOD == 'tfidf':
     model_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_tfidf_model')
     model = models.tfidfmodel.TfidfModel.load(model_file)
@@ -58,24 +58,34 @@ with open(tsv_file) as f:
 @csrf_exempt
 def diploisation(request):
 
+    texte = ''
+    if 'texte' in request.GET:
+        texte = request.GET['texte']
+    elif 'texte' in request.POST:
+        texte = request.POST['texte']
+
     # rien poste: home page
-    if request.method == 'GET':
+    if texte == '':
         return HttpResponse(homepage())
 
     #nb d'articles proches voulu
-    if request.POST.has_key('nb_articles'):
+    if 'nb_articles' in request.POST:
         if int(request.POST['nb_articles']) < 0:
             raise ValueError("Le nombre d'articles proches doit être > 0")
         nb_articles = min(int(request.POST['nb_articles']), settings.MAX_ARTICLES)
     else:
         nb_articles = 5
-        
-    neighbours = similar_articles.find_similar_articles(settings.CORPUS_NAME, settings.METHOD, n=nb_articles, content=request.POST['texte'], data_dir=settings.DATA_DIR, index=index, id2word=id2word, corpus=corpus, model=model)
-    
+
+    neighbours = similar_articles.find_similar_articles(settings.CORPUS_NAME, settings.METHOD, n=nb_articles, content=texte, data_dir=settings.DATA_DIR, index=index, id2word=id2word, corpus=corpus, model=model)
+
     result = []
     for article in neighbours:
-        result.append(dict(metadonnees[str(article['id'])].items() + article.items()))
-    print request.POST['texte'], result
+        meta = metadonnees[str(article['id'])]
+        meta['id'] = str(article['id'])
+        meta['score'] = 0 + article['score'] # converts np to float
+        result.append(meta)
+    print ('post:', texte)
+    print ('result:', result)
     return HttpResponse(json.dumps(result))
 
 
