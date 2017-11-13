@@ -16,9 +16,9 @@ import utils
 from habeascorpus import settings
 
 tsv_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '.tsv')
-corpus_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_' + settings.METHOD + '.mm')
-index_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_' + settings.METHOD + '_index')
-dico_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_wordids.txt')
+corpus_file = os.path.join(settings.MODELS_DIR, settings.CORPUS_NAME + '_' + settings.METHOD + '.mm')
+index_file = os.path.join(settings.MODELS_DIR, settings.CORPUS_NAME + '_' + settings.METHOD + '_index')
+dico_file = os.path.join(settings.MODELS_DIR, settings.CORPUS_NAME + '_wordids.txt')
 
 try:
     corpus = corpora.mmcorpus.MmCorpus(corpus_file)
@@ -36,18 +36,6 @@ try:
 except Exception:
     raise IOError("Impossible de charger le fichier %s" % (dico_file))
 
-if settings.METHOD == 'tfidf':
-    model_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_tfidf_model')
-    model = models.tfidfmodel.TfidfModel.load(model_file)
-
-elif settings.METHOD.startswith('lsi'):
-    model_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_' + settings.METHOD + '_model')
-    model = models.lsimodel.LsiModel.load(model_file)
-
-elif settings.METHOD.startswith('lda'):
-    model_file = os.path.join(settings.DATA_DIR, settings.CORPUS_NAME + '_' + settings.METHOD + '_model')
-    model = models.ldamodel.LdaModel.load(model_file)
-    
 # Construction d'un tableau contenant pour chaque article son titre, l'auteur, les mots-clefs
 metadonnees = {}
 with open(tsv_file) as f:
@@ -69,14 +57,30 @@ def diploisation(request):
         return HttpResponse(homepage())
 
     #nb d'articles proches voulu
+    nb_articles = 5
     if 'nb_articles' in request.POST:
-        if int(request.POST['nb_articles']) < 0:
-            raise ValueError("Le nombre d'articles proches doit être > 0")
-        nb_articles = min(int(request.POST['nb_articles']), settings.MAX_ARTICLES)
-    else:
-        nb_articles = 5
-
-    neighbours = similar_articles.find_similar_articles(settings.CORPUS_NAME, settings.METHOD, n=nb_articles, content=texte, data_dir=settings.DATA_DIR, index=index, id2word=id2word, corpus=corpus, model=model)
+        nb_articles = request.POST['nb_articles']
+    if 'nb_articles' in request.GET:
+        nb_articles = request.GET['nb_articles']
+    nb_articles = max(0, min(int(nb_articles), settings.MAX_ARTICLES))
+    
+    # choix de la méthode parmi celles définies dans habeascorpus.settings
+    method = settings.METHOD
+    if 'method' in request.GET and request.GET['method'] in settings.METHODS:
+        method = settings.METHODS[request.GET['method']]
+    if 'method' in request.POST and request.POST['method'] in settings.METHODS:
+        method = settings.METHODS[request.POST['method']]
+    if method == 'tfidf':
+        model_file = os.path.join(settings.MODELS_DIR, settings.CORPUS_NAME + '_tfidf_model')
+        model = models.tfidfmodel.TfidfModel.load(model_file)
+    elif method.startswith('lsi'):
+        model_file = os.path.join(settings.MODELS_DIR, settings.CORPUS_NAME + '_' + method + '_model')
+        model = models.lsimodel.LsiModel.load(model_file)
+    elif method.startswith('lda'):
+        model_file = os.path.join(settings.MODELS_DIR, settings.CORPUS_NAME + '_' + method + '_model')
+        model = models.ldamodel.LdaModel.load(model_file)
+    
+    neighbours = similar_articles.find_similar_articles(settings.CORPUS_NAME, method, n=nb_articles, content=texte, data_dir=settings.MODELS_DIR, index=index, id2word=id2word, corpus=corpus, model=model)
 
     result = []
     for article in neighbours:
@@ -86,7 +90,7 @@ def diploisation(request):
         result.append(meta)
     print ('post:', texte)
     print ('result:', result)
-    return HttpResponse(json.dumps(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
 
 
 def homepage():

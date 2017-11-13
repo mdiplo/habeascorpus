@@ -82,6 +82,8 @@ USE_TZ = True
 # Corpus
 CORPUS_NAME = 'articles-fr'
 METHOD = 'tfidf'
+METHODS = {'tfidf' : 'tfidf', 'lda' :'lda100', 'lsi': 'lsi100' }
 DATA_DIR = os.path.join(BASE_DIR, 'data')
+MODELS_DIR = os.path.join(BASE_DIR, 'models')
 MAX_ARTICLES = 20
 
