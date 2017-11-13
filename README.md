@@ -17,11 +17,11 @@ echo "SELECT a.id_article,a.titre, a.chapo,a.texte,a.lang, GROUP_CONCAT(DISTINCT
 
 (ici avec un test sur le statut 'publié') ; ce format permet d'extraire facilement avec `grep` le nombre d'articles écrits par Untel (ou parlant de "truc"), ou avec `wc` de mesurer le nombre de mots et de signes correspondants (voir http://seenthis.net/messages/224616).
 
-Une fois le fichier `corpus.tsv` obtenu, on le place dans un dossier `data` qui va contenir l'ensemble des fichiers générés par `habeascorpus`. 
+Une fois le fichier `corpus.tsv` obtenu, on le place dans un dossier `data/`; il faut aussi créer un dossier `models/` qui va contenir l'ensemble des fichiers générés par `habeascorpus`. 
 
 ```
 corpus="articles_fr"
-habeascorpus=`/chemin/vers/habeascorpus`
+habeascorpus="."  # ou `/chemin/vers/habeascorpus`)
 ```
 
 # Représentation bag-of-words
@@ -29,7 +29,7 @@ habeascorpus=`/chemin/vers/habeascorpus`
 La première étape est le calcul de la représentation bag-of-words du corpus :
 
 ```
-python $habeascorpus/scripts/corpus_to_matrix.py $corpus -v
+time python $habeascorpus/scripts/corpus_to_matrix.py $corpus -v
 ```
 
 où `$habeascorpus` est le chemin de `habeascorpus` sur le disque dur.
@@ -38,8 +38,7 @@ L'option `--stopwords=stopwords_file` permet d'ignorer certains mots.
 
 On obtient ainsi dans le dossier `data` le fichier dictionnaire `corpus_wordids.txt` qui associe un id à chaque mot du corpus, et le fichier `corpus_bow.mm`, représentation bag-of-words du corpus.
 
-_temps indicatif: 15s (fichier de 1000 articles)_
-_t.i. 2: 9m23s (articlesfr, 21000 articles)_
+_temps indicatif: 3 min (articlesfr, 21000 articles)_
 
 ## Algorithmes
 
@@ -48,54 +47,47 @@ On peut ensuite appliquer divers algorithmes:
 ### TFIDF
 
 ```
-python $habeascorpus/scripts/tfidf.py $corpus -v
+time python $habeascorpus/scripts/tfidf.py $corpus -v --saveindex
 ```
 
 (`corpus_name` est le nom du fichier contenant les articles sans l'extension `.tsv`)
 
 L'option `--saveindex` permet de sauvegarder un fichier d'index (utile pour la recherche de doublons, traductions,...)
 
-_temps indicatif: 7s_
-_t.i. 2: 9m23s (articlesfr, 21000 articles)_
+_temps indicatif: 3 min 30_
 
 ### LDA
 ```
 nb_topics=100
-python $habeascorpus/scripts/lda.py $corpus $nb_topics -v
+time python $habeascorpus/scripts/lda.py $corpus $nb_topics -v --saveindex
 ```
 
 L'option `--saveindex` permet de sauvegarder un fichier d'index (utile pour la recherche de contenu similaire)
 
-
-_temps indicatif: 65s_
+_temps indicatif: 24 min_
 
 ### LSI
 ```
 nb_topics=100
-python $habeascorpus/scripts/lsi.py $corpus $nb_topics -v
+time python $habeascorpus/scripts/lsi.py $corpus $nb_topics -v --saveindex
 ```
 
 L'option `--saveindex` permet de sauvegarder un fichier d'index (utile pour la recherche de contenu similaire)
 
-_temps indicatif: 8s_
+_temps indicatif: 2 min 30_
+
 
 ## Trucs cools à faire
-
-### Traduction
-
-Pour associer les articles d'un `corpus_etranger` à leur traduction dans `corpus_fr` :
-
-```
-python $habeascorpus/scripts/translate_corpus.py corpus_fr corpus_etranger output_name -v
-```
 
 ### Doublons
 
 Pour détecter les doublons dans un corpus :
 
 ```
-python $habeascorpus/scripts/find_doublons.py $corpus -v
+time python $habeascorpus/scripts/find_doublons.py $corpus -v
 ```
+
+les résultats sont enregistrés dans le fichier `models/doublons_{corpus}.txt`
 
 ### Contenu similaire
 
@@ -192,3 +184,17 @@ Pour ne pas avoir 1s de délai quand on envoie, il faut supprimer l’entête Ex
 ` curl -H "Expect;" --data-urlencode texte@text.txt http://127.0.0.1:8000/simserver/ `
 
 http://stackoverflow.com/questions/8717387/request-always-takes-atleast-1-second-when-timeout-2
+
+
+
+## Oldies
+
+### Traduction
+
+Pour associer les articles d'un `corpus_etranger` à leur traduction dans `corpus_fr`, on pouvait faire :
+
+```
+python $habeascorpus/scripts/translate_corpus.py corpus_fr corpus_etranger output_name -v
+```
+
+hélas Google translate a fermé son accès "free lunch" et la librairie goslate est abandonnée. À revoir le cas échéant.
