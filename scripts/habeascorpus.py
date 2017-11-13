@@ -4,6 +4,9 @@ import gzip
 from nltk.corpus import stopwords
 from gensim import corpora
 
+datadir = 'data'
+modelsdir = 'models'      
+
 
 class HabeasCorpus(corpora.TextCorpus):
 

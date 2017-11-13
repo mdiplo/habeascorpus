@@ -7,14 +7,16 @@ Ce script prend un corpus en entrée et détermine les documents doublons
 
 import argparse
 import logging
-import sys
+import sys, os
 from gensim import corpora, similarities, models
 
 import utils
 
+import habeascorpus as hc
+
 # Les arguments à fournir en ligne de commande
 parser = argparse.ArgumentParser(description="""Ce script prend un corpus en entrée et détermine les documents doublons""")
-parser.add_argument('corpus_name', type=str, help='Le nom du corpus')
+parser.add_argument('corpus', type=str, help='Le nom du corpus')
 parser.add_argument('-v', '--verbose', action='store_true',
                     help="Afficher les messages d'information")
 args = parser.parse_args()
@@ -23,9 +25,10 @@ args = parser.parse_args()
 if args.verbose:
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     
-corpus_file = args.corpus_name + '_tfidf.mm'
-index_file = args.corpus_name + '_tfidf_index'
-docid_file = args.corpus_name + '_docid.txt'
+corpus_file = os.path.join(hc.modelsdir, args.corpus + '_tfidf.mm')
+index_file = os.path.join(hc.modelsdir, args.corpus + '_tfidf_index')
+docid_file = os.path.join(hc.modelsdir, args.corpus + '_docid.txt')
+doublons_file = os.path.join(hc.modelsdir, 'doublons_' + args.corpus + '.txt')
 
 # Chargement du corpus     
 try:
@@ -40,7 +43,7 @@ except Exception:
     raise IOError("""Impossible de charger le fichier %s. Avez-vous bien appliqué le script tfidf.py avec l'option --saveindex ?"""% (index_file))
 
 # Les doublons sont enregistrés
-with open('doublons_' + args.corpus_name + '.txt', 'w') as o:
+with open(doublons_file, 'w') as o:
     
     for i, doc in enumerate(corpus):
 
@@ -56,4 +59,4 @@ with open('doublons_' + args.corpus_name + '.txt', 'w') as o:
             o.write(str(utils.get_article_by_corpus_number(i, docid_file)) + '\t' + str(utils.get_article_by_corpus_number(second_neighbour, docid_file)) + '\n')
         
         if args.verbose:
-            print "Document n°%d traité" % i
+            print ("Document n°%d traité" % i)

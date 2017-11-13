@@ -17,7 +17,9 @@ from gensim import corpora, similarities, models
 
 import utils
 
-def find_similar_articles(corpus_name, method, content, n=5, data_dir=os.getcwd(), index=None, id2word=None, corpus=None, model=None):
+import habeascorpus as hc
+
+def find_similar_articles(corpus_name, method, content, n=5, data_dir="models", index=None, id2word=None, corpus=None, model=None):
 
     """
     - corpus_name : Le nom du corpus sur lequel on travaille (fichier .tsv 
@@ -113,5 +115,5 @@ if __name__ == '__main__':
         logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
         
     content = utils.textimport(sys.stdin.read())
-    print (find_similar_articles(args.corpus_name, args.method, content=content))
+    print (find_similar_articles(args.corpus_name, args.method, content=content, n=5, data_dir='models'))
 

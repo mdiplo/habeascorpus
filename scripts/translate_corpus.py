@@ -8,6 +8,11 @@ Les résultats sont enregistrés dans un fichier.
 
 """
 
+"""
+Google has updated its translation service recently with a ticket mechanism to prevent simple crawler program like goslate from accessing. Though a more sophisticated crawler may still work technically, however it would have crossed the fine line between using the service and breaking the service. goslate will not be updated to break google’s ticket mechanism. Free lunch is over. Thanks for using.
+https://pypi.python.org/pypi/goslate
+"""
+
 import sys
 import os
 import string
@@ -46,6 +51,9 @@ def find_translation(text, corpus_name, index, dico, corpus, tfidfmodel):
    
     
 if __name__ == '__main__':
+
+    print ("no more free lunch. https://pypi.python.org/pypi/goslate")
+    return
 
     # Les arguments à fournir en ligne de commande
     parser = argparse.ArgumentParser(description="""Vérifie si le texte en entrée standard possède une traduction dans le corpus""")

@@ -15,9 +15,11 @@ import glob
 import json
 from gensim import corpora, models, similarities
 
+import habeascorpus as hc
+
 # Les arguments à fournir en ligne de commande
 parser = argparse.ArgumentParser(description="""Applique l'algorithme TFIDF sur un corpus""")
-parser.add_argument('corpus_name', type=str,
+parser.add_argument('corpus', type=str,
                     help="Le nom du corpus (i.e le nom du fichier sans l'extension .tsv)")
 parser.add_argument('--saveindex', action='store_true',
                     help="Si vrai, le script enregistre l'index de similarité pour le corpus'")
@@ -29,8 +31,11 @@ args = parser.parse_args()
 if args.verbose:
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-corpus_file = args.corpus_name + '_bow.mm'
-dictionary_file = args.corpus_name + '_wordids.txt'
+corpus_file = os.path.join(hc.modelsdir, args.corpus + '_bow.mm')
+dictionary_file = os.path.join(hc.modelsdir, args.corpus + '_wordids.txt')
+tfidf_file = os.path.join(hc.modelsdir, args.corpus + '_tfidf_model')
+tfidfmm_file = os.path.join(hc.modelsdir, args.corpus + '_tfidf.mm')
+tfidfindex_file = os.path.join(hc.modelsdir, args.corpus + '_tfidf_index')
 
 # Chargement du corpus
 try:
@@ -48,14 +53,14 @@ except Exception:
 tfidf = models.tfidfmodel.TfidfModel(corpus=corpus, id2word=id2word)
 
 # Enregistrement du modèle
-tfidf.save(args.corpus_name + '_tfidf_model')
+tfidf.save(tfidf_file)
 
 # Enregistrement du corpus TFIDF-ifié
-corpora.mmcorpus.MmCorpus.serialize(args.corpus_name + '_tfidf.mm', tfidf[corpus], progress_cnt=1000)
+corpora.mmcorpus.MmCorpus.serialize(tfidfmm_file, tfidf[corpus], progress_cnt=1000)
 
 # L'option --saveindex enregistre un fichier d'index qui permet de faire de la
 # recherche de similarité entre les articles
 if args.saveindex:
-    corpus = corpora.mmcorpus.MmCorpus(args.corpus_name + '_tfidf.mm')
-    index = similarities.docsim.Similarity(os.path.join(os.getcwd(), args.corpus_name + '_tfidf_index'), corpus, num_features=corpus.num_terms)
-    index.save(args.corpus_name + '_tfidf_index')
+    corpus = corpora.mmcorpus.MmCorpus(tfidfmm_file)
+    index = similarities.docsim.Similarity(tfidfindex_file, corpus, num_features=corpus.num_terms)
+    index.save(tfidfindex_file)

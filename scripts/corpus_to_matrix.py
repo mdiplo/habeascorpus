@@ -21,7 +21,7 @@ import os
 import argparse
 
 import utils
-import habeascorpus
+import habeascorpus as hc
 from gensim import corpora, similarities
 
 
@@ -34,14 +34,18 @@ parser.add_argument('-v', '--verbose', action='store_true',
                     help="Afficher les messages d'information")
 args = parser.parse_args()
 
-corpus_file = args.corpus + '.tsv'
+corpus_file = os.path.join(hc.datadir, args.corpus + '.tsv')
+bow_file = os.path.join(hc.modelsdir, args.corpus + '_bow.mm')
+wordids_file = os.path.join(hc.modelsdir, args.corpus + '_wordids.txt')
+docid_file =  os.path.join(hc.modelsdir, args.corpus + '_docid.txt')
 
 # L'option -v affiche les messages d'information
 if args.verbose:
     logging.basicConfig(format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s', level=logging.INFO)
 
-if (os.path.isfile(args.corpus + '_bow.mm')):
-    raise IOError("Le corpus existe déjà sous forme matricielle")
+
+if (os.path.isfile(bow_file)):
+    raise IOError("Le corpus existe déjà sous forme matricielle", bow_file)
 
 # Les stopwords qui doivent être ignorés lors de la tokenization
 if args.stopwords:
@@ -50,20 +54,20 @@ if args.stopwords:
 else:
     stopwords = []
 
-corpus = habeascorpus.HabeasCorpus(corpus_file, stopwords)
+corpus = hc.HabeasCorpus(corpus_file, stopwords)
 
 # Suppression des mots pas assez/trop fréquents
 corpus.dictionary.filter_extremes(no_below=5, no_above=0.5)
 
 # Enregistrement du dictionnaire de mots
-corpus.dictionary.save_as_text(args.corpus + '_wordids.txt')
+corpus.dictionary.save_as_text(wordids_file)
 
 # Enregistrement du corpus au format bag-of-words
-corpora.mmcorpus.MmCorpus.serialize(args.corpus + '_bow.mm', corpus, progress_cnt=1000)
+corpora.mmcorpus.MmCorpus.serialize(bow_file, corpus, progress_cnt=1000)
 
 # Création d'un fichier qui à la ligne n°i affiche l'id du document corpus[i]
 with open(corpus_file) as f:
-    o = open(args.corpus + '_docid.txt', 'w')
+    o = open(docid_file, 'w')
     f.readline()
     for raw_line in f:
         doc = utils.Document(raw_line)

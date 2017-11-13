@@ -14,9 +14,11 @@ import glob
 import json
 from gensim import corpora, models, similarities
 
+import habeascorpus as hc
+
 # Les arguments à fournir en ligne de commande
 parser = argparse.ArgumentParser(description="""Applique l'algorithme LSI sur un corpus""")
-parser.add_argument('corpus_name', type=str,
+parser.add_argument('corpus', type=str,
                     help="Le nom du corpus (i.e le nom du fichier sans l'extension .tsv)")
 parser.add_argument('nb_topics', type=int,
                     help="Le nombre de topics voulus")
@@ -30,8 +32,9 @@ args = parser.parse_args()
 if args.verbose:
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     
-corpus_file = args.corpus_name + '_bow.mm'
-dictionary_file = args.corpus_name + '_wordids.txt'
+corpus_file = os.path.join(hc.modelsdir, args.corpus + '_bow.mm')
+dictionary_file = os.path.join(hc.modelsdir, args.corpus + '_wordids.txt')
+lsi_file = os.path.join(hc.modelsdir, args.corpus + '_lsi')
 
 # Chargement du corpus
 try:
@@ -49,14 +52,14 @@ except Exception:
 lsi = models.lsimodel.LsiModel(corpus=corpus, id2word=id2word, num_topics=args.nb_topics)
 
 # Enregistrement du modèle
-lsi.save(args.corpus_name + '_lsi'  + str(args.nb_topics) + '_model')
+lsi.save(lsi_file  + str(args.nb_topics) + '_model')
 
 # Enregistrement du corpus LSI-ifié
-corpora.mmcorpus.MmCorpus.serialize(args.corpus_name + '_lsi' + str(args.nb_topics) + '.mm', lsi[corpus], progress_cnt=1000)
+corpora.mmcorpus.MmCorpus.serialize(lsi_file + str(args.nb_topics) + '.mm', lsi[corpus], progress_cnt=1000)
 
 # L'option --saveindex enregistre un fichier d'index qui permet de faire de la
 # recherche de similarité entre les articles
 if args.saveindex:
-    corpus = corpora.mmcorpus.MmCorpus(args.corpus_name + '_lsi' + str(args.nb_topics) + '.mm')
-    index = similarities.docsim.Similarity(args.corpus_name + '_lsi' + str(args.nb_topics) + '_index', corpus, num_features=corpus.num_terms)
-    index.save(args.corpus_name + '_lsi' + str(args.nb_topics) + '_index')
+    corpus = corpora.mmcorpus.MmCorpus(lsi_file + str(args.nb_topics) + '.mm')
+    index = similarities.docsim.Similarity(lsi_file + str(args.nb_topics) + '_index', corpus, num_features=corpus.num_terms)
+    index.save(lsi_file + str(args.nb_topics) + '_index')
