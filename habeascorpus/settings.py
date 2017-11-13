@@ -26,6 +26,7 @@ SECRET_KEY = '$7zi5j4_+^mx(r2zoi*5+$m(#jx$x@nr+9$vltvwb*%6$h$(2k'
 
 # SECURITY WARNING: don't run with  debug turned on in production!
 DEBUG = False
+#DEBUG = True
 
 TEMPLATE_DEBUG = False
 

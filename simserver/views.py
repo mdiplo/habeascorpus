@@ -20,6 +20,9 @@ corpus_file = os.path.join(settings.MODELS_DIR, settings.CORPUS_NAME + '_' + set
 index_file = os.path.join(settings.MODELS_DIR, settings.CORPUS_NAME + '_' + settings.METHOD + '_index')
 dico_file = os.path.join(settings.MODELS_DIR, settings.CORPUS_NAME + '_wordids.txt')
 
+
+print('settings.CORPUS_NAME', settings.CORPUS_NAME)
+
 try:
     corpus = corpora.mmcorpus.MmCorpus(corpus_file)
 except Exception:
@@ -82,12 +85,12 @@ def diploisation(request):
     
     neighbours = similar_articles.find_similar_articles(settings.CORPUS_NAME, method, n=nb_articles, content=texte, data_dir=settings.MODELS_DIR, index=index, id2word=id2word, corpus=corpus, model=model)
 
-    result = []
+    result = { 'method': method, 'articles': [] }
     for article in neighbours:
         meta = metadonnees[str(article['id'])]
         meta['id'] = str(article['id'])
         meta['score'] = 0 + article['score'] # converts np to float
-        result.append(meta)
+        result['articles'].append(meta)
     print ('post:', texte)
     print ('result:', result)
     return HttpResponse(json.dumps(result), content_type="application/json")
