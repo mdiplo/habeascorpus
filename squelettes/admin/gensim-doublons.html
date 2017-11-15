@@ -1,0 +1,10 @@
+<style>
+dt { margin-top: 0.5em }
+dt, dd { margin-left: 0}
+span { display: inline-block; width: 5em; }
+</style>
+
+<BOUCLE_doublons(DATA){source csv,../habeascorpus/models/doublons_articles-fr.txt}>
+<dt><span>s:#VALEUR{0} </span> <BOUCLE_s(ARTICLES){id_article=#VALEUR{0}}{statut==.*}>[(#DATE_REDAC|affdate_court)] <a href="ecrire/?exec=article&id_article=#ID_ARTICLE">#TITRE</a> (#STATUT) #ID_RUBRIQUE</BOUCLE_s></dt>
+<dd><span>d:#VALEUR{1} </span> <BOUCLE_d(ARTICLES){id_article=#VALEUR{1}}{statut==.*}>[(#DATE_REDAC|affdate_court)] <a href="ecrire/?exec=article&id_article=#ID_ARTICLE">#TITRE</a> (#STATUT) #ID_RUBRIQUE</BOUCLE_d></dd>
+</BOUCLE_doublons>
