@@ -200,9 +200,3 @@ python $habeascorpus/scripts/translate_corpus.py corpus_fr corpus_etranger outpu
 hélas Google translate a fermé son accès "free lunch" et la librairie goslate est abandonnée. À revoir le cas échéant.
 
 
-# Usage
-
-```
-cd /var/alternc/html/a/archivesdiplo/habeascorpus/
-time /usr/bin/nice -n 19 /usr/bin/ionice -c2 -n7 bash run.sh
-```
