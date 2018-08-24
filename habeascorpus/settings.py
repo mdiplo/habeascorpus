@@ -26,7 +26,7 @@ SECRET_KEY = '$7zi5j4_+^mx(r2zoi*5+$m(#jx$x@nr+9$vltvwb*%6$h$(2k'
 
 # SECURITY WARNING: don't run with  debug turned on in production!
 DEBUG = False
-#DEBUG = True
+DEBUG = True
 
 TEMPLATE_DEBUG = False
 
@@ -81,7 +81,8 @@ USE_L10N = True
 USE_TZ = True
 
 # Corpus
-CORPUS_NAME = 'articles-fr'
+CORPUS_NAME = 'articles'
+LANGS = ['fr', 'en']
 METHOD = 'tfidf'
 METHODS = {'tfidf' : 'tfidf', 'lda' :'lda100', 'lsi': 'lsi100' }
 DATA_DIR = os.path.join(BASE_DIR, 'data')
